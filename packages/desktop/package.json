@@ -3,7 +3,7 @@
   "productName": "LifeTracker",
   "version": "1.0.0",
   "private": true,
-  "description": "LifeTracker desktop app \u2014 tasks, timers and daily productivity reports",
+  "description": "LifeTracker desktop app — tasks, timers and daily productivity reports",
   "author": "LifeTracker",
   "homepage": "https://github.com/amarnathgaddam75/Productivity_Tracker-",
   "main": "electron/main.cjs",
@@ -20,6 +20,7 @@
     "dist:linux": "vite build && electron-builder --linux"
   },
   "devDependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
     "@lifetracker/shared": "1.0.0",
     "@vitejs/plugin-react": "^6.0.0",
     "autoprefixer": "^10.4.21",
@@ -38,7 +39,7 @@
   "build": {
     "appId": "com.lifetracker.desktop",
     "productName": "LifeTracker",
-    "copyright": "Copyright \u00a9 2026 LifeTracker",
+    "copyright": "Copyright © 2026 LifeTracker",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -102,6 +103,5 @@
     "publish": null,
     "executableName": "lifetracker",
     "artifactName": "LifeTracker-${version}-${os}-${arch}.${ext}"
-  },
-  "dependencies": {}
+  }
 }
