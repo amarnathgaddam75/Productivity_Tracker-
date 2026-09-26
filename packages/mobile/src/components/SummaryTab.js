@@ -33,6 +33,10 @@ export default function SummaryTab() {
 
   return (
     <div className="space-y-4">
+      <header className="pb-2 pt-[33vh]">
+        <p className="caps text-slate-400"><span className="mr-2 text-[var(--accent)]">{'//02'}</span>Progress / Report</p>
+        <h1 className="font-display mt-2 text-6xl leading-none" style={{ textShadow: '0 0 24px rgba(7,5,13,.9)' }}>Today</h1>
+      </header>
       <div className="card flex items-center gap-5 p-5">
         <div className="relative shrink-0" style={{ width: size, height: size }}>
           <svg width={size} height={size} className="-rotate-90">

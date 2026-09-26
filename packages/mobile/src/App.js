@@ -8,6 +8,7 @@ import SummaryTab from './components/SummaryTab';
 import AlertsTab from './components/AlertsTab';
 import BottomNav from './components/BottomNav';
 import Toasts from './components/Toasts';
+import Scene from './components/Scene';
 import { applyUpdate } from './serviceWorkerRegistration';
 
 function Splash() {
@@ -42,10 +43,11 @@ function TrackedApp() {
   if (status === 'signedOut') return <Login />;
 
   return (
-    <div className="mx-auto flex h-full max-w-lg flex-col">
+    <div className="relative mx-auto flex h-full max-w-lg flex-col">
+      <Scene tab={tab} />
       <Header />
       <UpdateBanner />
-      <main className="flex-1 overflow-y-auto px-4 pb-28 pt-2">
+      <main className="relative z-10 flex-1 overflow-y-auto px-4 pb-28 pt-2">
         {tab === 'now' && <NowTab />}
         {tab === 'summary' && <SummaryTab />}
         {tab === 'alerts' && <AlertsTab />}

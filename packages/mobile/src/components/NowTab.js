@@ -1,73 +1,64 @@
 import { useMemo, useState } from 'react';
 import { Pause, Play, Check, Plus } from 'lucide-react';
-import { timer, clockParts, formatHM, formatDuration, useNow, visibleTasks, sortTasks, timerOrbState } from '@lifetracker/shared';
+import { timer, clockParts, formatHM, formatDuration, useNow, visibleTasks, sortTasks, activeTimer } from '@lifetracker/shared';
 import { useStore } from '../config';
-import Orb from './Orb';
 
-function TimerCard({ task, nextUp, now }) {
+function TimerCard({ now }) {
+  const tasks = useStore((st) => st.tasks);
+  const today = useStore((st) => st.today);
   const { toggleTimer, toggleComplete, startTimer } = useStore.getState();
-  const running = timer.isRunning(task);
-  const elapsed = task ? timer.elapsedMs(task, now) : 0;
-  const est = task ? timer.estimateMs(task) : 0;
-  const remaining = est - elapsed;
-  const over = est > 0 && remaining < 0;
-  const warn = est > 0 && !over && remaining <= timer.warningThresholdMs(task);
-  const orbState = timerOrbState({ running, warn, over, hasTask: Boolean(task) });
-  const accent = over ? 'text-rose-300' : warn ? 'text-amber-300' : 'text-brand-300';
+  const { task, running, elapsed, est, remaining, over, warn, nextUp } = activeTimer(tasks, today, now);
   const { h, m, s } = clockParts(elapsed);
   const pct = est ? Math.min(1, elapsed / est) : 0;
+  const shadow = { textShadow: '0 0 24px rgba(7,5,13,.9)' };
 
+  // The particle clock is the full-screen <Scene>; this is the type floating under it.
   return (
-    <div className="card relative overflow-hidden">
-      <Orb state={orbState} className="absolute inset-x-0 top-0 h-72" />
-      <div className="relative px-5 pb-5 pt-5">
-        {!task ? (
-          <>
-            <p className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//00'}</span>Timer / idle</p>
-            <h2 className="font-display mt-44 text-5xl leading-[0.9]">Ready<br />to focus</h2>
-            <p className="mt-3 text-sm text-slate-400">{nextUp ? <>Next up: <span className="text-slate-100">{nextUp.title}</span></> : 'Add a task below to get started.'}</p>
-            {nextUp && (
-              <button className="btn-primary mt-5 w-full py-4" onClick={() => startTimer(nextUp.id)}>
-                <Play className="h-4 w-4" /> Start
-              </button>
-            )}
-          </>
-        ) : (
-          <>
-            <div className="flex items-center justify-between">
-              <p className="caps text-slate-400"><span className={`mr-2 ${accent}`}>{'//'}{running ? '01' : '00'}</span>{running ? 'Now tracking' : 'Paused'}</p>
-              {running && <span className={`caps flex items-center gap-1.5 ${accent}`}><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" /> Live</span>}
-            </div>
-            <div className="mt-44">
-              <div className="line-clamp-2 text-base text-slate-200">{task.title}</div>
-              <div className="font-display mt-1 flex items-baseline tabular">
-                <span className="text-7xl leading-none">{h}:{m}</span>
-                <span className="ml-2 text-2xl text-slate-500">{s}</span>
+    <section className="pt-[40vh]">
+      {!task ? (
+        <>
+          <p className="caps text-slate-400"><span className="mr-2 text-[var(--accent)]">{'//00'}</span>Timer / idle</p>
+          <h2 className="font-display mt-3 text-6xl leading-[0.9]" style={shadow}>Ready<br />to focus</h2>
+          <p className="mt-3 text-sm text-slate-400" style={shadow}>{nextUp ? <>Next up: <span className="text-slate-100">{nextUp.title}</span></> : 'Add a task below to get started.'}</p>
+          {nextUp && (
+            <button className="btn-primary mt-5 w-full py-4" onClick={() => startTimer(nextUp.id)}>
+              <Play className="h-4 w-4" /> Start
+            </button>
+          )}
+        </>
+      ) : (
+        <>
+          <div className="flex items-center justify-between">
+            <p className="caps text-slate-400"><span className="mr-2 text-[var(--accent)]">{running ? '//01' : '//00'}</span>{running ? 'Now tracking' : 'Paused'}</p>
+            {running && <span className="caps flex items-center gap-1.5 text-[var(--accent)]"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" /> Live</span>}
+          </div>
+          <div className="mt-3 line-clamp-2 text-base text-slate-100" style={shadow}>{task.title}</div>
+          <div className="font-display flex items-baseline tabular" style={shadow}>
+            <span className="text-[84px] leading-none">{h}:{m}</span>
+            <span className="ml-2 text-3xl text-slate-500">{s}</span>
+          </div>
+          {est > 0 && (
+            <>
+              <div className="mt-4 h-px bg-white/10">
+                <div className="h-full bg-[var(--accent)] transition-all" style={{ width: `${pct * 100}%` }} />
               </div>
-            </div>
-            {est > 0 && (
-              <>
-                <div className="mt-5 h-px bg-white/10">
-                  <div className={`h-full transition-all ${over ? 'bg-rose-400' : pct > 0.85 ? 'bg-amber-300' : 'bg-brand-300'}`} style={{ width: `${pct * 100}%` }} />
-                </div>
-                <div className="caps mt-2.5 flex justify-between tabular text-slate-500">
-                  <span>Estimate {formatDuration(est)}</span>
-                  <span className={over || warn ? accent : ''}>{over ? `${formatHM(-remaining)} over` : `${formatHM(remaining)} left`}</span>
-                </div>
-              </>
-            )}
-            <div className="mt-6 flex items-center gap-3">
-              <button onClick={() => toggleTimer(task.id)} className={`flex-1 py-4 ${running ? 'btn-soft' : 'btn-primary'}`}>
-                {running ? <><Pause className="h-4 w-4" /> Pause</> : <><Play className="h-4 w-4" /> Resume</>}
-              </button>
-              <button onClick={() => toggleComplete(task.id)} className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-emerald-300/40 text-emerald-300 active:scale-[.97]" aria-label="Complete task">
-                <Check className="h-5 w-5" />
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+              <div className="caps mt-2.5 flex justify-between tabular text-slate-500">
+                <span>Estimate {formatDuration(est)}</span>
+                <span className={over || warn ? 'text-[var(--accent)]' : ''}>{over ? `${formatHM(-remaining)} over` : `${formatHM(remaining)} left`}</span>
+              </div>
+            </>
+          )}
+          <div className="mt-6 flex items-center gap-3">
+            <button onClick={() => toggleTimer(task.id)} className={`flex-1 py-4 ${running ? 'btn-soft bg-slate-950/40 backdrop-blur' : 'btn-primary'}`}>
+              {running ? <><Pause className="h-4 w-4" /> Pause</> : <><Play className="h-4 w-4" /> Resume</>}
+            </button>
+            <button onClick={() => toggleComplete(task.id)} className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-emerald-300/40 bg-slate-950/40 text-emerald-300 backdrop-blur active:scale-[.97]" aria-label="Complete task">
+              <Check className="h-5 w-5" />
+            </button>
+          </div>
+        </>
+      )}
+    </section>
   );
 }
 
@@ -148,23 +139,18 @@ export default function NowTab() {
   const tasks = useStore((s) => s.tasks);
   const today = useStore((s) => s.today);
 
-  const { active, list, nextUp } = useMemo(() => {
-    const all = visibleTasks(tasks);
-    const todays = sortTasks(all.filter((t) => t.date === today || timer.isRunning(t)));
-    const running = all.find(timer.isRunning);
-    const lastWorked = all
-      .filter((t) => !t.completed && t.sessions?.length)
-      .sort((a, b) => (b.sessions[b.sessions.length - 1]?.end || 0) - (a.sessions[a.sessions.length - 1]?.end || 0))[0];
-    return { active: running || lastWorked, list: todays, nextUp: todays.find((t) => !t.completed) };
-  }, [tasks, today]);
+  const list = useMemo(
+    () => sortTasks(visibleTasks(tasks).filter((t) => t.date === today || timer.isRunning(t))),
+    [tasks, today],
+  );
 
   const open = list.filter((t) => !t.completed);
   const done = list.filter((t) => t.completed);
 
   return (
     <div className="space-y-5">
-      <TimerCard task={active} nextUp={nextUp} now={now} />
-      <section>
+      <TimerCard now={now} />
+      <section className="pt-6">
         <div className="mb-2 flex items-baseline justify-between px-1">
           <h2 className="caps text-slate-300"><span className="mr-2 text-brand-300">{'//02'}</span>Active tasks</h2>
           <span className="caps tabular text-slate-500">{done.length}/{list.length} done</span>
