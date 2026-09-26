@@ -1,6 +1,6 @@
-name: Deploy mobile PWA
+name: Deploy website + mobile PWA
 
-# Builds the PWA and deploys it (plus Firestore rules) to Firebase Hosting.
+# Builds the landing page (/) and the PWA (/app) and deploys them (plus Firestore rules) to Firebase Hosting.
 # The web config comes from packages/mobile/.env and the project from .firebaserc.
 # Required secret: FIREBASE_SERVICE_ACCOUNT (JSON key of a service account with
 # the "Firebase Admin" and "API Keys Viewer" roles).
@@ -11,6 +11,8 @@ on:
     branches: [main]
     paths:
       - 'packages/mobile/**'
+      - 'packages/landing/**'
+      - 'scripts/**'
       - 'packages/shared/**'
       - 'firebase/**'
       - 'firebase.json'
@@ -27,7 +29,7 @@ jobs:
       - run: npm ci
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
-      - run: npm run build:mobile
+      - run: npm run build:hosting
       - name: Deploy to Firebase
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

@@ -5,12 +5,13 @@ import { useStore } from '../config.js';
 import { ProgressBar } from './ui.jsx';
 
 function StatusChip({ task, now }) {
-  if (task.completed) return <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">✓ Done</span>;
-  if (timer.isRunning(task)) return <span className="rounded-full bg-brand-500/10 px-2 py-0.5 text-xs font-medium text-brand-700 dark:text-brand-300">● Running</span>;
+  const chip = 'caps rounded-full border px-2 py-0.5 text-[9px]';
+  if (task.completed) return <span className={`${chip} border-emerald-300/30 text-emerald-300`}>Done</span>;
+  if (timer.isRunning(task)) return <span className={`${chip} border-brand-300/40 text-brand-200`}>● Running</span>;
   const est = timer.estimateMs(task);
-  if (est && timer.elapsedMs(task, now) > est) return <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-rose-700 dark:text-rose-400">Over</span>;
-  if (timer.elapsedMs(task, now) > 0) return <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">Paused</span>;
-  return <span className="rounded-full bg-slate-500/10 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">To do</span>;
+  if (est && timer.elapsedMs(task, now) > est) return <span className={`${chip} border-rose-300/40 text-rose-300`}>Over</span>;
+  if (timer.elapsedMs(task, now) > 0) return <span className={`${chip} border-amber-300/30 text-amber-300`}>Paused</span>;
+  return <span className={`${chip} border-white/10 text-slate-500`}>To do</span>;
 }
 
 export default function TaskRow({ task, showDate }) {
@@ -51,11 +52,11 @@ export default function TaskRow({ task, showDate }) {
   }
 
   return (
-    <li className={`group flex items-center gap-4 rounded-xl px-2 py-3 transition hover:bg-slate-50 dark:hover:bg-slate-800/50 ${running ? 'bg-brand-50/60 dark:bg-brand-500/5' : ''}`}>
+    <li className={`group flex items-center gap-4 rounded-xl px-2 py-3 transition hover:bg-white/[0.03] ${running ? 'bg-brand-400/[0.06]' : ''}`}>
       <button
         onClick={() => toggleComplete(task.id)}
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${
-          task.completed ? 'animate-pop border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 hover:border-emerald-500 dark:border-slate-600'
+          task.completed ? 'animate-pop border-emerald-300 bg-emerald-300 text-slate-950' : 'border-white/20 hover:border-emerald-300'
         }`}
         aria-label={task.completed ? 'Mark incomplete' : 'Mark complete'}
       >
@@ -77,8 +78,8 @@ export default function TaskRow({ task, showDate }) {
       </div>
 
       <div className="w-36 text-right text-sm tabular">
-        <div className={`font-mono ${running ? 'font-semibold text-brand-600 dark:text-brand-300' : ''}`}>{formatHM(elapsed)}</div>
-        <div className="text-xs text-slate-500">of {est ? formatDuration(est) : 'no estimate'}</div>
+        <div className={`font-display text-lg leading-none ${running ? 'text-brand-200' : 'text-slate-200'}`}>{formatHM(elapsed)}</div>
+        <div className="caps mt-1.5 text-[9px] text-slate-500">of {est ? formatDuration(est) : 'no estimate'}</div>
       </div>
 
       <div className="flex items-center gap-1">
@@ -91,7 +92,7 @@ export default function TaskRow({ task, showDate }) {
           <button
             onClick={() => toggleTimer(task.id)}
             className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-              running ? 'bg-amber-500 text-white hover:bg-amber-400' : 'bg-brand-500/10 text-brand-600 hover:bg-brand-500 hover:text-white dark:text-brand-300'
+              running ? 'bg-slate-50 text-slate-950 hover:bg-white' : 'border border-white/15 text-slate-300 hover:border-white/60 hover:text-white'
             }`}
             aria-label={running ? 'Pause timer' : 'Start timer'}
           >

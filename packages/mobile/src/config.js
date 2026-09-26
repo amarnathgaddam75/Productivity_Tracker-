@@ -31,7 +31,7 @@ function deliver({ title, body }) {
   }
   if (document.visibilityState === 'hidden' && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
     navigator.serviceWorker?.ready
-      .then((reg) => reg.showNotification(title, { body, icon: '/icon-192.png', badge: '/favicon.png', tag: title }))
+      .then((reg) => reg.showNotification(title, { body, icon: `${process.env.PUBLIC_URL}/icon-192.png`, badge: `${process.env.PUBLIC_URL}/favicon.png`, tag: title }))
       .catch(() => {});
   }
 }

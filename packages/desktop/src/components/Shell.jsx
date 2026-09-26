@@ -27,40 +27,40 @@ export default function Shell() {
 
   return (
     <div className="flex h-full">
-      <aside className="flex w-60 shrink-0 flex-col border-r border-slate-200 bg-white/70 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
-        <Logo className="px-2 py-1" />
-        <nav className="mt-8 space-y-1">
-          {NAV.map(({ id, label, icon: Icon }) => (
+      <aside className="flex w-60 shrink-0 flex-col border-r border-white/[0.06] p-6">
+        <Logo sub="Desktop" />
+        <nav className="mt-14 space-y-1">
+          {NAV.map(({ id, label, icon: Icon }, i) => (
             <button
               key={id}
               onClick={() => setView(id)}
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${
-                view === id
-                  ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300'
-                  : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
-              }`}
+              className={`group flex w-full items-center gap-3 rounded-full py-2 pr-3 text-left transition ${view === id ? 'text-slate-50' : 'text-slate-500 hover:text-slate-200'}`}
             >
-              <Icon className="h-4 w-4" />
-              {label}
+              <span className={`h-px transition-all duration-300 ${view === id ? 'w-6 bg-brand-300' : 'w-3 bg-slate-600 group-hover:w-4'}`} />
+              <span className="caps">
+                <span className={view === id ? 'text-brand-300' : 'text-slate-600'}>//0{i + 1}</span> {label}
+              </span>
+              <Icon className="ml-auto h-3.5 w-3.5 opacity-0 transition group-hover:opacity-60" strokeWidth={1.5} />
             </button>
           ))}
         </nav>
-        <div className="mt-auto rounded-xl border border-slate-200 p-3 dark:border-slate-800">
-          <div className="truncate text-sm font-medium" title={displayName}>{displayName}</div>
-          <div className="truncate text-xs text-slate-500" title={user?.email}>{user?.email}</div>
-          <button onClick={signOut} className="btn-ghost mt-2 w-full justify-start px-2 py-1.5 text-xs">
-            <LogOut className="h-3.5 w-3.5" /> Sign out
+        <div className="mt-auto border-t border-white/[0.06] pt-5">
+          <div className="truncate text-sm text-slate-100" title={displayName}>{displayName}</div>
+          <div className="mt-1 truncate text-xs text-slate-500" title={user?.email}>{user?.email}</div>
+          <button onClick={signOut} className="btn-ghost -ml-3 mt-3 px-3 py-1.5">
+            <LogOut className="h-3 w-3" /> Sign out
           </button>
         </div>
       </aside>
 
       <main className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-8 dark:border-slate-800">
+        <header className="flex shrink-0 items-end justify-between px-8 pb-2 pt-8">
           <div>
-            <h1 className="text-lg font-semibold">{NAV.find((n) => n.id === view)?.label}</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {formatDayLabel(today, today)} · {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+            <p className="caps text-slate-500">
+              <span className="mr-2 text-brand-300">//0{NAV.findIndex((n) => n.id === view) + 1}</span>
+              {formatDayLabel(today, today)} / {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
             </p>
+            <h1 className="font-display mt-2 text-5xl leading-none">{NAV.find((n) => n.id === view)?.label}</h1>
           </div>
           <div className="flex items-center gap-2">
             <SyncBadge />
@@ -68,7 +68,7 @@ export default function Shell() {
           </div>
         </header>
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-6xl p-8">
+          <div className="mx-auto max-w-6xl px-8 pb-10 pt-6">
             {view === 'tasks' && <TasksView />}
             {view === 'reports' && <ReportsView />}
             {view === 'settings' && <SettingsView />}
