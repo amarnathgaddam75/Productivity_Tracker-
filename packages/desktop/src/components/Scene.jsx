@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { activeTimer, sceneOrbState, useNow } from '@lifetracker/shared';
+import { activeTimer, sceneOrbState, useNow, buildBriefing } from '@lifetracker/shared';
+import { useAssistant } from '../assistant/state.js';
 import { useStore } from '../config.js';
 import { Orb } from './ui.jsx';
 
@@ -17,8 +18,11 @@ export default function Scene({ view, offset = [0.42, 0] }) {
   const now = useNow(1000);
   const tasks = useStore((s) => s.tasks);
   const today = useStore((s) => s.today);
+  const settings = useStore((s) => s.settings);
+  const speaking = useAssistant((s) => s.speaking);
   const info = activeTimer(tasks, today, now);
-  const state = { ...sceneOrbState(view, info), offset };
+  const status = view === 'assistant' ? buildBriefing({ tasks, today, settings, now }).status : null;
+  const state = { ...sceneOrbState(view, info, { status, speaking }), offset };
 
   // Burst when a task gets completed.
   const [burst, setBurst] = useState(0);

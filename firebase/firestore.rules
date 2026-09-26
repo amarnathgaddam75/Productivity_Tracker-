@@ -6,7 +6,10 @@ rules_version = '2';
 //   users/{uid}                      profile   { email, displayName, createdAt }
 //   users/{uid}/tasks/{taskId}       task      (see validTask)
 //   users/{uid}/summaries/{date}     daily report snapshot, id = "YYYY-MM-DD"
-//   users/{uid}/meta/settings        user preferences
+//   users/{uid}/meta/settings        user preferences (incl. assistant options)
+//   users/{uid}/meta/push            Web Push key pair used by the user's desktops
+//   users/{uid}/meta/presence        what the desktop is doing now (shown on the phone)
+//   users/{uid}/devices/{deviceId}   phones subscribed to push notifications
 //
 // Every document is readable/writable only by its owner. Writes carry an
 // `updatedAt` timestamp and the rules enforce last-write-wins: an update may
@@ -64,13 +67,58 @@ service cloud.firestore {
         && isTimestamp(d.updatedAt);
     }
 
+    function optBool(d, k) {
+      return !(k in d) || d[k] is bool;
+    }
+
+    function optInt(d, k, lo, hi) {
+      return !(k in d) || (d[k] is int && d[k] >= lo && d[k] <= hi);
+    }
+
     function validSettings() {
       let d = data();
       return d.keys().hasOnly(['displayName', 'dailyGoalHours', 'summaryHour', 'carryOver', 'autoStartNext',
-                               'systemNotifications', 'updatedAt'])
+                               'systemNotifications', 'assistantName', 'workStartHour', 'workEndHour',
+                               'checkinMinutes', 'nudgeUntrackedMinutes', 'idlePauseMinutes', 'distractions',
+                               'voice', 'sounds', 'pushToPhone', 'shareTitles', 'runInBackground', 'startAtLogin',
+                               'updatedAt'])
+        && (!('assistantName' in d) || (d.assistantName is string && d.assistantName.size() <= 30))
+        && (!('distractions' in d) || (d.distractions is string && d.distractions.size() <= 1000))
+        && optInt(d, 'workStartHour', 0, 23) && optInt(d, 'workEndHour', 1, 24)
+        && optInt(d, 'checkinMinutes', 0, 600) && optInt(d, 'nudgeUntrackedMinutes', 0, 600)
+        && optInt(d, 'idlePauseMinutes', 0, 600)
+        && optBool(d, 'voice') && optBool(d, 'sounds') && optBool(d, 'pushToPhone') && optBool(d, 'shareTitles')
+        && optBool(d, 'runInBackground') && optBool(d, 'startAtLogin') && optBool(d, 'carryOver')
+        && optBool(d, 'autoStartNext') && optBool(d, 'systemNotifications')
         && (!('displayName' in d) || (d.displayName is string && d.displayName.size() <= 60))
         && (!('dailyGoalHours' in d) || (d.dailyGoalHours is number && d.dailyGoalHours > 0 && d.dailyGoalHours <= 24))
         && (!('summaryHour' in d) || (d.summaryHour is int && d.summaryHour >= 0 && d.summaryHour <= 23))
+        && isTimestamp(d.updatedAt);
+    }
+
+    function validPushKeys() {
+      let d = data();
+      return d.keys().hasOnly(['publicKey', 'privateKey', 'subject', 'updatedAt'])
+        && d.publicKey is string && d.publicKey.size() < 200
+        && d.privateKey is string && d.privateKey.size() < 200
+        && isTimestamp(d.updatedAt);
+    }
+
+    function validPresence() {
+      let d = data();
+      return d.keys().hasOnly(['app', 'title', 'idle', 'idleSec', 'taskId', 'taskTitle', 'platform', 'supported', 'updatedAt'])
+        && (!('app' in d) || d.app == null || (d.app is string && d.app.size() <= 100))
+        && (!('title' in d) || d.title == null || (d.title is string && d.title.size() <= 200))
+        && isTimestamp(d.updatedAt);
+    }
+
+    function validDevice(deviceId) {
+      let d = data();
+      return d.keys().hasOnly(['id', 'endpoint', 'keys', 'platform', 'userAgent', 'deleted', 'createdAt', 'updatedAt'])
+        && d.id == deviceId
+        && d.endpoint is string && d.endpoint.size() < 1024 && d.endpoint.matches('^https://.*')
+        && d.keys is map && d.keys.keys().hasOnly(['p256dh', 'auth'])
+        && d.deleted is bool
         && isTimestamp(d.updatedAt);
     }
 
@@ -91,7 +139,16 @@ service cloud.firestore {
 
       match /meta/{docId} {
         allow read, delete: if isOwner(uid);
-        allow create, update: if isOwner(uid) && docId == 'settings' && validSettings() && notOlder();
+        allow create, update: if isOwner(uid) && notOlder() && (
+          (docId == 'settings' && validSettings()) ||
+          (docId == 'push' && validPushKeys()) ||
+          (docId == 'presence' && validPresence())
+        );
+      }
+
+      match /devices/{deviceId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validDevice(deviceId) && notOlder();
       }
     }
 

@@ -13,6 +13,8 @@ import {
 } from '@lifetracker/shared';
 import { useStore } from '../config.js';
 import { StatCard, ProgressRing, EmptyState } from './ui.jsx';
+import Timeline from './Timeline.jsx';
+import { useAssistant } from '../assistant/state.js';
 
 const hoursText = (h) => formatDuration(h * MS_HOUR);
 
@@ -23,6 +25,8 @@ export default function ReportsView() {
   const goalHours = useStore((s) => s.settings.dailyGoalHours);
   const summaries = useStore((s) => s.summaries);
   const [day, setDay] = useState(today);
+  const segments = useAssistant((s) => s.segments);
+  const settings = useStore((s) => s.settings);
   const [seed, setSeed] = useState(0);
 
   const report = useMemo(
@@ -134,6 +138,10 @@ export default function ReportsView() {
             </table>
           )}
         </div>
+      </div>
+      <div className="card p-6">
+        <h3 className="caps mb-6 text-slate-400"><span className="mr-2 text-[var(--accent)]">{'//08'}</span>Timeline / {day === today ? 'today' : day}</h3>
+        <Timeline tasks={tasks} segments={day === today ? segments : []} day={day} settings={settings} now={day === today ? now : Date.parse(`${day}T23:59:59`)} showApps={Boolean(window.desktop) && day === today} />
       </div>
     </div>
   );
