@@ -13,19 +13,16 @@
     "cleanUrls": false,
     "rewrites": [
       {
+        "source": "/app",
+        "destination": "/app/index.html"
+      },
+      {
         "source": "/app/**",
         "destination": "/app/index.html"
       },
       {
         "source": "**",
         "destination": "/index.html"
-      }
-    ],
-    "redirects": [
-      {
-        "source": "/app",
-        "destination": "/app/",
-        "type": 301
       }
     ],
     "headers": [
