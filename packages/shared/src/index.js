@@ -10,3 +10,4 @@ export * from './firebase.js';
 export * from './store.js';
 export * from './hooks.js';
 export * from './orb.js';
+export * from './scene.js';

@@ -16,6 +16,10 @@
     background-image: radial-gradient(70vmax 50vmax at 70% 0%, rgba(167, 139, 250, 0.09), transparent 70%);
     background-attachment: fixed;
   }
+  :root {
+    --accent: #a78bfa;
+    --glow: 167, 139, 250;
+  }
   ::selection {
     @apply bg-brand-400/30;
   }
@@ -39,8 +43,9 @@
     font-weight: 500;
     font-stretch: 112%;
   }
+  /* Glass panels: the full-screen particle scene glows through them */
   .card {
-    @apply rounded-2xl border border-white/[0.08] bg-white/[0.025] backdrop-blur-sm;
+    @apply rounded-2xl border border-white/[0.09] bg-slate-950/70 backdrop-blur-md;
   }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] transition
