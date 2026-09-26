@@ -11,6 +11,10 @@
   html {
     color-scheme: dark;
   }
+  :root {
+    --accent: #a78bfa;
+    --glow: 167, 139, 250;
+  }
   body {
     @apply bg-slate-950 text-slate-50 antialiased;
     background-image: radial-gradient(90vmax 60vmax at 50% -10%, rgba(167, 139, 250, 0.12), transparent 70%);
@@ -37,7 +41,7 @@
     font-stretch: 112%;
   }
   .card {
-    @apply rounded-3xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm;
+    @apply rounded-3xl border border-white/[0.09] bg-slate-950/70 backdrop-blur-md;
   }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3.5 text-[11px] font-medium uppercase tracking-[0.2em] transition active:scale-[.98] disabled:opacity-40;

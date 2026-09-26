@@ -25,6 +25,10 @@ export default function AlertsTab() {
 
   return (
     <div className="space-y-3">
+      <header className="pb-3 pt-[33vh]">
+        <p className="caps text-slate-400"><span className="mr-2 text-[var(--accent)]">{'//03'}</span>Notifications / Sync</p>
+        <h1 className="font-display mt-2 text-6xl leading-none" style={{ textShadow: '0 0 24px rgba(7,5,13,.9)' }}>Alerts</h1>
+      </header>
       <div className="flex items-center justify-between px-1">
         <h2 className="caps text-slate-300"><span className="mr-2 text-brand-300">{'//01'}</span>Notifications</h2>
         {notifications.length > 0 && <button onClick={clear} className="caps text-brand-300">Clear all</button>}

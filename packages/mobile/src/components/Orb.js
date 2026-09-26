@@ -14,7 +14,7 @@ export default function Orb({ state, count = 22000, scale = 0.8, point = 1.6, cl
     if (burstKey) orbRef.current?.burst();
   }, [burstKey, orbRef]);
   return (
-    <div className={`pointer-events-none ${className.includes('absolute') ? '' : 'relative'} ${className}`} aria-hidden="true">
+    <div className={`pointer-events-none ${/\b(absolute|fixed)\b/.test(className) ? '' : 'relative'} ${className}`} aria-hidden="true">
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       {!supported && (
         <div

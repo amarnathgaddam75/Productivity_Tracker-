@@ -34,10 +34,10 @@ export default function TasksView() {
   const doneCount = lists.done.length;
 
   return (
-    <div className="space-y-6">
+    <div>
       <TimerHero />
 
-      <div className="card">
+      <div className="card mt-20">
         <div className="border-b border-slate-200 p-5 dark:border-slate-800">
           <AddTaskForm />
         </div>

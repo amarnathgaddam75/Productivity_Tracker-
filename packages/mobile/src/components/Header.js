@@ -56,10 +56,10 @@ export default function Header() {
   const standalone = window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone;
 
   return (
-    <header className="safe-top sticky top-0 z-30 bg-slate-950/80 px-4 pb-2 backdrop-blur-md">
+    <header className="safe-top sticky top-0 z-30 bg-gradient-to-b from-slate-950/90 to-transparent px-4 pb-3">
       <div className="flex items-center justify-between pt-3">
         <div className="min-w-0">
-          <div className="caps text-slate-500"><span className="mr-2 text-brand-300">{'//LT'}</span>{greeting}</div>
+          <div className="caps text-slate-500"><span className="mr-2 text-[var(--accent)]">{'//LT'}</span>{greeting}</div>
           <div className="font-display mt-1 truncate text-2xl leading-none">{name.split('@')[0]}</div>
         </div>
         <div className="flex items-center gap-3" ref={ref}>

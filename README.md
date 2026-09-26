@@ -15,7 +15,11 @@
 ## Design
 Every surface shares one visual language: a near-black violet canvas, **Archivo** at weight 100 and 125% width for display type, tiny spaced-out `//NN` labels, pill buttons and hairline rules. At its centre is a **WebGL particle body** (`packages/shared/src/orb.js`, no dependencies). Tens of thousands of additive-blended points morph between a sphere, a cube, a clock face, a spiral and two linked orbs, drift with a gentle swirl and scatter from the cursor. When WebGL isn't available it falls back to a CSS glow, and it respects `prefers-reduced-motion`.
 - **Landing page:** a scroll-driven story with one shape per section (plan, track, progress, sync, download). The download buttons link to the latest GitHub release assets.
-- **Apps:** the timer *is* the orb. It forms a spinning particle clock while a task is tracked, turns amber when about an hour is left and rose when over the estimate, and settles into a dim sphere when paused.
+- **Apps:** the whole app is one full-screen particle scene with the landing page's layout: brand top-left, sync, alerts and a menu button top-right, view ticks on the right edge, a full-screen menu, and a bottom rail showing today's stats that fills toward the daily goal. The orb follows what you are doing:
+  - **Tasks:** a spinning particle clock while a timer runs (amber when about an hour is left, rose when over the estimate) and a silver cube when idle.
+  - **Reports:** an amber galaxy.
+  - **Settings and alerts:** two linked orbs.
+  - Completing a task bursts it outward.
 
 ## Features
 
