@@ -1,0 +1,13 @@
+node_modules/
+dist/
+packages/mobile/build/
+release/
+coverage/
+.env.local
+.env.*.local
+*.log
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+.DS_Store

@@ -1,0 +1,41 @@
+name: Deploy mobile PWA
+
+# Builds the PWA and deploys it (plus Firestore rules) to Firebase Hosting.
+# The web config comes from packages/mobile/.env and the project from .firebaserc.
+# Required secret: FIREBASE_SERVICE_ACCOUNT (JSON key of a service account with
+# the "Firebase Admin" and "API Keys Viewer" roles).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/mobile/**'
+      - 'packages/shared/**'
+      - 'firebase/**'
+      - 'firebase.json'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+      - run: npm run build:mobile
+      - name: Deploy to Firebase
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::error::Add the FIREBASE_SERVICE_ACCOUNT repository secret (see SETUP.md)."; exit 1
+          fi
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx firebase deploy \
+            --only hosting,firestore:rules,firestore:indexes \
+            --non-interactive
