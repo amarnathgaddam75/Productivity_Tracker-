@@ -46,45 +46,45 @@ export default function ReportsView() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button className="icon-btn" onClick={() => setDay(shiftDateKey(day, -1))} aria-label="Previous day"><ChevronLeft className="h-5 w-5" /></button>
-          <span className="w-44 text-center font-semibold">{formatDayLabel(day, today)}</span>
+          <span className="caps w-44 text-center text-slate-200">{formatDayLabel(day, today)}</span>
           <button className="icon-btn" disabled={day >= today} onClick={() => setDay(shiftDateKey(day, 1))} aria-label="Next day"><ChevronRight className="h-5 w-5" /></button>
         </div>
         {day !== today && <button className="btn-ghost text-xs" onClick={() => setDay(today)}>Back to today</button>}
       </div>
 
       <div className="grid grid-cols-4 gap-4">
-        <StatCard icon={CheckCircle2} label="Tasks completed" value={`${report.completedTasks}/${report.totalTasks}`} sub={report.totalTasks ? `${report.totalTasks - report.completedTasks} remaining` : 'No tasks planned'} accent="text-emerald-600 bg-emerald-500/10 dark:text-emerald-400" />
-        <StatCard icon={Clock} label="Hours worked" value={hoursText(report.hoursWorked)} sub={`Planned ${hoursText(report.estimatedHours)}`} />
-        <StatCard icon={Gauge} label="Productivity score" value={`${report.productivityScore}%`} sub={scoreLabel(report.productivityScore)} accent="text-violet-600 bg-violet-500/10 dark:text-violet-400" />
-        <StatCard icon={Zap} label="Efficiency" value={report.efficiency == null ? '—' : `${report.efficiency}%`} sub={efficiencyLabel(report.efficiency)} accent="text-amber-600 bg-amber-500/10 dark:text-amber-400" />
+        <StatCard index="01" icon={CheckCircle2} label="Completed" value={`${report.completedTasks}/${report.totalTasks}`} sub={report.totalTasks ? `${report.totalTasks - report.completedTasks} remaining` : 'No tasks planned'} accent="text-emerald-300" />
+        <StatCard index="02" icon={Clock} label="Hours worked" value={hoursText(report.hoursWorked)} sub={`Planned ${hoursText(report.estimatedHours)}`} />
+        <StatCard index="03" icon={Gauge} label="Productivity" value={`${report.productivityScore}%`} sub={scoreLabel(report.productivityScore)} accent="text-violet-300" />
+        <StatCard index="04" icon={Zap} label="Efficiency" value={report.efficiency == null ? '—' : `${report.efficiency}%`} sub={efficiencyLabel(report.efficiency)} accent="text-amber-300" />
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         <div className="card flex items-center gap-6 p-6">
           <ProgressRing value={report.goalProgress} size={132} color={report.goalReached ? 'text-emerald-500' : 'text-brand-500'}>
-            <span className="text-2xl font-semibold tabular">{Math.round(report.goalProgress * 100)}%</span>
-            <span className="text-xs text-slate-500">of goal</span>
+            <span className="font-display text-3xl tabular">{Math.round(report.goalProgress * 100)}%</span>
+            <span className="caps text-slate-500">of goal</span>
           </ProgressRing>
           <div>
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-500"><Target className="h-4 w-4" /> Daily goal</div>
-            <div className="mt-1 text-2xl font-semibold tabular">{hoursText(report.hoursWorked)}</div>
-            <div className="text-sm text-slate-500">of {hoursText(report.goalHours)}</div>
-            {report.goalReached && <div className="mt-2 animate-pop text-sm font-medium text-emerald-600 dark:text-emerald-400">🎉 Goal reached!</div>}
+            <div className="caps flex items-center gap-2 text-slate-400"><Target className="h-3.5 w-3.5 text-brand-300" strokeWidth={1.5} /> Daily goal</div>
+            <div className="font-display mt-3 text-3xl tabular">{hoursText(report.hoursWorked)}</div>
+            <div className="mt-1 text-sm text-slate-500">of {hoursText(report.goalHours)}</div>
+            {report.goalReached && <div className="caps mt-3 animate-pop text-emerald-300">Goal reached ✦</div>}
           </div>
         </div>
 
-        <div className="card relative col-span-2 overflow-hidden bg-gradient-to-br from-brand-600 to-violet-600 p-6 text-white">
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+        <div className="card relative col-span-2 overflow-hidden p-6">
+          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-400/20 blur-3xl" />
           <div className="relative flex h-full flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-brand-100">Daily motivation</span>
-              <button className="rounded-lg p-1.5 text-brand-100 transition hover:bg-white/10 hover:text-white" onClick={() => setSeed((n) => n + 1)} title="Another message" aria-label="Another message">
-                <Shuffle className="h-4 w-4" />
+              <span className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//05'}</span>Daily motivation</span>
+              <button className="icon-btn" onClick={() => setSeed((n) => n + 1)} title="Another message" aria-label="Another message">
+                <Shuffle className="h-3.5 w-3.5" />
               </button>
             </div>
-            <p className="mt-4 text-2xl font-medium leading-snug">“{report.message.text}”</p>
-            <p className="mt-4 text-sm text-brand-100">
-              {report.completedTasks} of {report.totalTasks} tasks done · {hoursText(report.hoursWorked)} focused
+            <p className="mt-5 text-2xl font-light leading-snug text-slate-50" style={{ fontStretch: '110%' }}>“{report.message.text}”</p>
+            <p className="caps mt-5 text-slate-500">
+              {report.completedTasks} of {report.totalTasks} tasks done / {hoursText(report.hoursWorked)} focused
             </p>
           </div>
         </div>
@@ -92,17 +92,17 @@ export default function ReportsView() {
 
       <div className="grid grid-cols-5 gap-4">
         <div className="card col-span-2 p-6">
-          <h3 className="text-sm font-semibold">Hours worked · last 7 days</h3>
+          <h3 className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//06'}</span>Hours / last 7 days</h3>
           <WeekChart history={history} goal={goalHours} selected={day} onSelect={setDay} today={today} />
         </div>
         <div className="card col-span-3 p-6">
-          <h3 className="text-sm font-semibold">Estimated vs actual</h3>
+          <h3 className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//07'}</span>Estimated vs actual</h3>
           {report.perTask.length === 0 ? (
             <EmptyState icon={BarChart3} title="No tasks for this day">Tasks you plan or track time on will appear here.</EmptyState>
           ) : (
             <table className="mt-4 w-full text-sm">
               <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+                <tr className="caps text-left text-slate-500">
                   <th className="pb-2 font-medium">Task</th>
                   <th className="pb-2 text-right font-medium">Estimate</th>
                   <th className="pb-2 text-right font-medium">Actual</th>
@@ -121,8 +121,8 @@ export default function ReportsView() {
                       <td className="py-2 text-right tabular">{hoursText(t.actualHours)}</td>
                       <td className="py-2 pl-4">
                         <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-                            <div className={`h-full rounded-full ${ratio > 1 ? 'bg-rose-500' : 'bg-brand-500'}`} style={{ width: `${Math.min(1, ratio) * 100}%` }} />
+                          <div className="h-px w-28 overflow-hidden bg-white/10">
+                            <div className={`h-full ${ratio > 1 ? 'bg-rose-400' : 'bg-brand-300'}`} style={{ width: `${Math.min(1, ratio) * 100}%` }} />
                           </div>
                           <span className="w-10 text-right text-xs tabular text-slate-500">{t.estimatedHours ? `${Math.round(ratio * 100)}%` : ''}</span>
                         </div>

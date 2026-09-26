@@ -5,15 +5,15 @@ import { useStore } from '../config';
 
 const hrs = (h) => formatDuration(h * MS_HOUR);
 
-function Stat({ icon: Icon, label, value, sub, cls }) {
+function Stat({ icon: Icon, label, value, sub, cls, index }) {
   return (
     <div className="card p-4">
-      <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-        <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${cls}`}><Icon className="h-4 w-4" /></span>
-        {label}
+      <div className="caps flex items-center justify-between text-slate-400">
+        <span><span className={`mr-1.5 ${cls}`}>{'//'}{index}</span>{label}</span>
+        <Icon className={`h-3.5 w-3.5 ${cls}`} strokeWidth={1.5} />
       </div>
-      <div className="mt-2 text-2xl font-semibold tabular">{value}</div>
-      <div className="truncate text-xs text-slate-500">{sub}</div>
+      <div className="font-display mt-3 text-3xl tabular">{value}</div>
+      <div className="mt-1 truncate text-xs text-slate-500">{sub}</div>
     </div>
   );
 }
@@ -27,7 +27,7 @@ export default function SummaryTab() {
   const r = useMemo(() => reportWithMessage(computeDailyReport(tasks, today, { goalHours, now }), `${today}:${seed}`), [tasks, today, goalHours, now, seed]);
 
   const size = 150;
-  const stroke = 12;
+  const stroke = 3;
   const rad = (size - stroke) / 2;
   const c = 2 * Math.PI * rad;
 
@@ -36,41 +36,42 @@ export default function SummaryTab() {
       <div className="card flex items-center gap-5 p-5">
         <div className="relative shrink-0" style={{ width: size, height: size }}>
           <svg width={size} height={size} className="-rotate-90">
-            <circle cx={size / 2} cy={size / 2} r={rad} strokeWidth={stroke} className="fill-none stroke-slate-200 dark:stroke-slate-800" />
+            <circle cx={size / 2} cy={size / 2} r={rad} strokeWidth={1} className="fill-none stroke-white/10" />
             {r.goalProgress > 0.005 && (
-              <circle cx={size / 2} cy={size / 2} r={rad} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - r.goalProgress)} className={`fill-none stroke-current transition-all duration-700 ${r.goalReached ? 'text-emerald-500' : 'text-brand-500'}`} />
+              <circle cx={size / 2} cy={size / 2} r={rad} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - r.goalProgress)} className={`fill-none stroke-current transition-all duration-700 ${r.goalReached ? 'text-emerald-300' : 'text-brand-300'}`} />
             )}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-semibold tabular">{hrs(r.hoursWorked)}</span>
-            <span className="text-xs text-slate-500">of {hrs(r.goalHours)} goal</span>
+            <span className="font-display text-2xl tabular">{hrs(r.hoursWorked)}</span>
+            <span className="caps mt-1 text-slate-500">of {hrs(r.goalHours)}</span>
           </div>
         </div>
         <div>
-          <div className="text-sm font-medium text-slate-500">Today's goal</div>
-          <div className="mt-1 text-3xl font-semibold tabular">{Math.round(r.goalProgress * 100)}%</div>
-          {r.goalReached ? <div className="mt-1 animate-pop text-sm font-medium text-emerald-600">🎉 Goal reached!</div> : <div className="mt-1 text-sm text-slate-500">{hrs(Math.max(0, r.goalHours - r.hoursWorked))} to go</div>}
+          <div className="caps text-slate-400"><span className="mr-1.5 text-brand-300">{'//00'}</span>Today's goal</div>
+          <div className="font-display mt-2 text-5xl tabular">{Math.round(r.goalProgress * 100)}%</div>
+          {r.goalReached ? <div className="caps mt-2 animate-pop text-emerald-300">Goal reached ✦</div> : <div className="mt-2 text-sm text-slate-500">{hrs(Math.max(0, r.goalHours - r.hoursWorked))} to go</div>}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Stat icon={CheckCircle2} label="Completed" value={`${r.completedTasks}/${r.totalTasks}`} sub={r.totalTasks ? `${r.totalTasks - r.completedTasks} remaining` : 'No tasks yet'} cls="bg-emerald-500/10 text-emerald-600" />
-        <Stat icon={Clock} label="Hours worked" value={hrs(r.hoursWorked)} sub={`Planned ${hrs(r.estimatedHours)}`} cls="bg-brand-500/10 text-brand-600" />
-        <Stat icon={Gauge} label="Productivity" value={`${r.productivityScore}%`} sub={scoreLabel(r.productivityScore)} cls="bg-violet-500/10 text-violet-600" />
-        <Stat icon={Zap} label="Efficiency" value={r.efficiency == null ? '—' : `${r.efficiency}%`} sub={efficiencyLabel(r.efficiency)} cls="bg-amber-500/10 text-amber-600" />
+        <Stat icon={CheckCircle2} label="Completed" value={`${r.completedTasks}/${r.totalTasks}`} sub={r.totalTasks ? `${r.totalTasks - r.completedTasks} remaining` : 'No tasks yet'} cls="text-emerald-300" index="01" />
+        <Stat icon={Clock} label="Hours" value={hrs(r.hoursWorked)} sub={`Planned ${hrs(r.estimatedHours)}`} cls="text-brand-300" index="02" />
+        <Stat icon={Gauge} label="Score" value={`${r.productivityScore}%`} sub={scoreLabel(r.productivityScore)} cls="text-violet-300" index="03" />
+        <Stat icon={Zap} label="Efficiency" value={r.efficiency == null ? '—' : `${r.efficiency}%`} sub={efficiencyLabel(r.efficiency)} cls="text-amber-300" index="04" />
       </div>
 
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 to-violet-600 p-5 text-white">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wider text-brand-100">Motivation</span>
-          <button onClick={() => setSeed((n) => n + 1)} className="rounded-lg p-1.5 active:bg-white/10" aria-label="Another message"><Shuffle className="h-4 w-4" /></button>
+      <div className="card relative overflow-hidden p-5">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-brand-400/20 blur-3xl" />
+        <div className="relative flex items-center justify-between">
+          <span className="caps text-slate-400"><span className="mr-1.5 text-brand-300">{'//05'}</span>Motivation</span>
+          <button onClick={() => setSeed((n) => n + 1)} className="rounded-full p-1.5 text-slate-400 active:bg-white/10" aria-label="Another message"><Shuffle className="h-4 w-4" /></button>
         </div>
-        <p className="mt-3 text-lg font-medium leading-snug">“{r.message.text}”</p>
+        <p className="relative mt-3 text-lg font-light leading-snug" style={{ fontStretch: '110%' }}>“{r.message.text}”</p>
       </div>
 
       {r.perTask.length > 0 && (
         <div className="card p-4">
-          <h3 className="mb-2 text-sm font-semibold">Estimated vs actual</h3>
+          <h3 className="caps mb-3 text-slate-400"><span className="mr-1.5 text-brand-300">{'//06'}</span>Estimated vs actual</h3>
           <ul className="space-y-3">
             {r.perTask.map((t) => {
               const ratio = t.estimatedHours ? t.actualHours / t.estimatedHours : 0;
@@ -80,8 +81,8 @@ export default function SummaryTab() {
                     <span className="truncate">{t.completed ? '✓ ' : ''}{t.title}</span>
                     <span className="shrink-0 tabular text-slate-500">{hrs(t.actualHours)} / {t.estimatedHours ? hrs(t.estimatedHours) : '—'}</span>
                   </div>
-                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-                    <div className={`h-full rounded-full ${ratio > 1 ? 'bg-rose-500' : 'bg-brand-500'}`} style={{ width: `${Math.min(1, ratio) * 100}%` }} />
+                  <div className="mt-1.5 h-px overflow-hidden bg-white/10">
+                    <div className={`h-full ${ratio > 1 ? 'bg-rose-400' : 'bg-brand-300'}`} style={{ width: `${Math.min(1, ratio) * 100}%` }} />
                   </div>
                 </li>
               );

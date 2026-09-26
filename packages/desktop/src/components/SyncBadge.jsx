@@ -2,11 +2,11 @@ import { Cloud, CloudOff, RefreshCw, AlertTriangle, CheckCircle2 } from 'lucide-
 import { useStore } from '../config.js';
 
 const STATES = {
-  synced: { icon: CheckCircle2, text: 'Synced', cls: 'text-emerald-600 bg-emerald-500/10 dark:text-emerald-400' },
-  syncing: { icon: RefreshCw, text: 'Syncing…', cls: 'text-brand-600 bg-brand-500/10 dark:text-brand-300', spin: true },
-  pending: { icon: Cloud, text: 'Pending', cls: 'text-amber-600 bg-amber-500/10 dark:text-amber-400' },
-  offline: { icon: CloudOff, text: 'Offline', cls: 'text-slate-600 bg-slate-500/10 dark:text-slate-300' },
-  error: { icon: AlertTriangle, text: 'Sync error', cls: 'text-rose-600 bg-rose-500/10 dark:text-rose-400' },
+  synced: { icon: CheckCircle2, text: 'Synced', cls: 'text-emerald-300' },
+  syncing: { icon: RefreshCw, text: 'Syncing', cls: 'text-brand-300', spin: true },
+  pending: { icon: Cloud, text: 'Pending', cls: 'text-amber-300' },
+  offline: { icon: CloudOff, text: 'Offline', cls: 'text-slate-300' },
+  error: { icon: AlertTriangle, text: 'Sync error', cls: 'text-rose-300' },
 };
 
 export default function SyncBadge() {
@@ -25,8 +25,8 @@ export default function SyncBadge() {
           ? `${sync.pending} change(s) waiting to sync`
           : 'All changes are saved to the cloud';
   return (
-    <button onClick={() => syncNow()} title={title} className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${st.cls}`}>
-      <Icon className={`h-3.5 w-3.5 ${st.spin ? 'animate-spin' : ''}`} />
+    <button onClick={() => syncNow()} title={title} className={`caps flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 ${st.cls}`}>
+      <Icon className={`h-3 w-3 ${st.spin ? 'animate-spin' : ''}`} strokeWidth={1.75} />
       {st.text}
       {sync.pending > 0 && key !== 'syncing' && <span className="tabular">({sync.pending})</span>}
     </button>

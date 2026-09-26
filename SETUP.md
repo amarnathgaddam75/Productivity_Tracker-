@@ -22,7 +22,8 @@ In a second terminal:
 echo "VITE_FIREBASE_EMULATOR_HOST=127.0.0.1"      > packages/desktop/.env.local
 echo "REACT_APP_FIREBASE_EMULATOR_HOST=127.0.0.1" > packages/mobile/.env.local
 npm run dev:desktop        # Electron window with hot reload (DevTools open)
-npm run dev:mobile         # PWA on http://localhost:3000
+npm run dev:mobile         # PWA on http://localhost:3000/app
+npm run dev:landing        # landing page on http://localhost:5174
 ```
 The emulators use the real security rules in `firebase/firestore.rules`. Remove the `*_EMULATOR_HOST` lines when you switch to a real project.
 
@@ -65,7 +66,7 @@ Sign up in either app, then log in with the same account in the other. Changes s
 ## 4. Build the desktop installers
 
 ```bash
-npm run dist:win      # → packages/desktop/release/LifeTracker-1.0.0-win-x64.exe (installer) + portable .exe
+npm run dist:win      # → packages/desktop/release/LifeTracker-1.0.0-win-x64-setup.exe (installer) + -portable.exe
 npm run dist:mac      # → LifeTracker-1.0.0-mac-x64.dmg and -arm64.dmg
 npm run dist:linux    # → LifeTracker-1.0.0-linux-x86_64.AppImage and -amd64.deb
 ```
@@ -89,9 +90,9 @@ npm run dist:linux    # → LifeTracker-1.0.0-linux-x86_64.AppImage and -amd64.d
 
 ## 5. Deploy the mobile PWA (Firebase Hosting)
 ```bash
-npm run deploy:mobile     # builds packages/mobile and runs: firebase deploy --only hosting
+npm run deploy:mobile     # builds the landing page + PWA into hosting/ and runs: firebase deploy --only hosting
 ```
-The app is then available at `https://your-project.web.app`. On the phone:
+The landing page is then at `https://your-project.web.app` and the phone app at `https://your-project.web.app/app/`. On the phone:
 - **Android (Chrome):** open the URL, then use the menu → *Install app*. The in-app account menu also has an **Install app** button.
 - **iOS (Safari 16.4+):** open the URL, then Share → **Add to Home Screen**. Background notifications and the icon badge need the installed web app on iOS.
 
@@ -104,7 +105,8 @@ To deploy automatically on every push to `main`, add a `FIREBASE_SERVICE_ACCOUNT
 | `npm run dev:desktop` | Vite + Electron with hot reload |
 | `npm run dev:web` | Desktop UI in the browser only |
 | `npm run dev:mobile` | PWA dev server |
-| `npm run build:desktop` / `build:mobile` | Production web builds |
+| `npm run build:desktop` / `build:mobile` / `build:landing` | Production web builds |
+| `npm run build:hosting` | Landing page (`/`) + PWA (`/app`) assembled into `hosting/` |
 | `npm run dist:win` / `dist:mac` / `dist:linux` | Desktop installers |
 | `npm run emulators` | Local Auth + Firestore emulators |
 | `npm run deploy:rules` | Deploy Firestore rules and indexes |

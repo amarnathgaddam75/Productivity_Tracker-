@@ -13,7 +13,7 @@ import { applyUpdate } from './serviceWorkerRegistration';
 function Splash() {
   return (
     <div className="flex h-full items-center justify-center">
-      <img src="/icon-192.png" alt="" className="h-16 w-16 animate-pulse rounded-2xl" />
+      <img src={`${process.env.PUBLIC_URL}/icon-192.png`} alt="" className="h-16 w-16 animate-pulse rounded-2xl" />
     </div>
   );
 }
@@ -61,7 +61,7 @@ export default function App() {
     return (
       <div className="flex h-full items-center justify-center p-6 text-center text-sm text-slate-600 dark:text-slate-400">
         <div>
-          <img src="/icon-192.png" alt="" className="mx-auto mb-4 h-14 w-14 rounded-2xl" />
+          <img src={`${process.env.PUBLIC_URL}/icon-192.png`} alt="" className="mx-auto mb-4 h-14 w-14 rounded-2xl" />
           <p className="font-semibold text-slate-900 dark:text-white">Firebase is not configured</p>
           <p className="mt-2">Add your Firebase web config to <code>packages/mobile/.env.local</code> (see <code>.env.example</code>) and rebuild.</p>
         </div>

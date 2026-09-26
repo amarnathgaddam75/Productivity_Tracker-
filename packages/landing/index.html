@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#07050d" />
+    <meta name="description" content="LifeTracker — plan your day, track every hour and see your progress. Desktop app for Windows, macOS and Linux with a synced mobile companion." />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>LifeTracker — Own your day</title>
+  </head>
+  <body>
+    <div class="glow" aria-hidden="true"></div>
+    <canvas id="orb" aria-hidden="true"></canvas>
+    <div class="fallback-orb" aria-hidden="true"></div>
+
+    <!-- chrome -->
+    <header class="chrome top">
+      <div class="brand">
+        <a href="#s0" class="badge" aria-label="LifeTracker home">LT</a>
+        <div>
+          <div class="meta"><span class="wide-only">Productivity tracker / Desktop + mobile</span><span class="narrow-only">LifeTracker</span></div>
+          <nav class="meta-links"><a href="/app/">Open web app</a> / <a href="#s5">Download</a></nav>
+        </div>
+      </div>
+      <div class="top-right">
+        <div class="status"><span class="dot"></span><span id="status-text">Live sync / Firebase</span></div>
+        <button class="menu-btn" id="menu-btn" aria-label="Open menu" aria-expanded="false">
+          <span class="menu-label">Menu</span><span class="menu-ring"><span></span></span>
+        </button>
+      </div>
+    </header>
+
+    <nav class="ticks" aria-label="Sections">
+      <a href="#s0" aria-label="Intro"></a><a href="#s1" aria-label="Plan"></a><a href="#s2" aria-label="Track"></a>
+      <a href="#s3" aria-label="Progress"></a><a href="#s4" aria-label="Sync"></a><a href="#s5" aria-label="Download"></a>
+    </nav>
+
+    <footer class="chrome bottom">
+      <div class="meta" id="tech-line">Tasks / Timers / Reports / Sync</div>
+      <div class="hint" id="hint">Scroll / move to disturb</div>
+      <div class="meta" id="count-line">— particles</div>
+      <div class="progress"><span id="progress-bar"></span></div>
+    </footer>
+
+    <!-- menu overlay -->
+    <div class="menu" id="menu" hidden>
+      <ol>
+        <li><a href="#s0"><span>//00</span>Intro</a></li>
+        <li><a href="#s1"><span>//01</span>Plan</a></li>
+        <li><a href="#s2"><span>//02</span>Track</a></li>
+        <li><a href="#s3"><span>//03</span>Progress</a></li>
+        <li><a href="#s4"><span>//04</span>Sync</a></li>
+        <li><a href="#s5"><span>//05</span>Download</a></li>
+      </ol>
+      <div class="menu-foot meta"><a href="/app/">Open web app ↗</a> / <a href="https://github.com/amarnathgaddam75/Productivity_Tracker-" target="_blank" rel="noreferrer">Source on GitHub ↗</a></div>
+    </div>
+
+    <main>
+      <section id="s0" class="panel left" data-shape="sphere" data-color="#a78bfa" data-tech="Tasks / Timers / Reports / Sync">
+        <div class="copy">
+          <p class="kicker"><span>//00</span> Productivity / Time tracking</p>
+          <h1 class="title">Life<br />Tracker</h1>
+          <p class="lede">Plan your day, track every hour and see exactly where your time goes — on your laptop and your phone.</p>
+          <div class="actions">
+            <a class="pill" href="#s1">Enter the day <span class="arrow">↓</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section id="s1" class="panel right" data-shape="cube" data-color="#c7d2fe" data-tech="Tasks / Estimates / Carry-over / Offline">
+        <div class="copy">
+          <p class="kicker"><span>//01</span> Plan / Tasks</p>
+          <h2 class="title">Plan the<br />day</h2>
+          <p class="lede">Add tasks with a time estimate in seconds. Edit, reorder and check them off. Anything unfinished carries over to tomorrow at midnight.</p>
+          <div class="actions"><a class="pill" href="/app/">Open web app <span class="arrow">↗</span></a></div>
+        </div>
+      </section>
+
+      <section id="s2" class="panel left" data-shape="ring" data-color="#5eead4" data-tech="Per-task timers / Pause + resume / Time warnings">
+        <div class="copy">
+          <p class="kicker"><span>//02</span> Track / Timer</p>
+          <h2 class="title">Every<br />hour</h2>
+          <p class="lede">One tap starts a timer on any task. See actual time against your estimate live, and get a nudge when an hour is left.</p>
+          <div class="stat-row">
+            <div><b>1</b><span>tap to start</span></div>
+            <div><b>60m</b><span>warning</span></div>
+            <div><b>∞</b><span>sessions</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s3" class="panel right" data-shape="galaxy" data-color="#fbbf24" data-tech="Score / Efficiency / Daily goal / 7-day history">
+        <div class="copy">
+          <p class="kicker"><span>//03</span> Progress / Reports</p>
+          <h2 class="title">See the<br />signal</h2>
+          <p class="lede">A daily report of tasks done, hours worked, your productivity score and how your estimates compare with reality — plus a word of motivation.</p>
+          <div class="stat-row">
+            <div><b>%</b><span>score</span></div>
+            <div><b>±</b><span>efficiency</span></div>
+            <div><b>7d</b><span>history</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s4" class="panel left" data-shape="twin" data-color="#7dd3fc" data-tech="Firestore / Offline queue / Last-write-wins">
+        <div class="copy">
+          <p class="kicker"><span>//04</span> Sync / Offline</p>
+          <h2 class="title">Always<br />in sync</h2>
+          <p class="lede">Start a timer on your laptop, pause it from your phone. Works offline and syncs the moment you are back online. Your data is private to your account.</p>
+          <div class="actions"><a class="pill" href="/app/">Install on phone <span class="arrow">↗</span></a></div>
+        </div>
+      </section>
+
+      <section id="s5" class="panel right" data-shape="sphere" data-color="#a78bfa" data-tech="Windows / macOS / Linux / iOS + Android web app">
+        <div class="copy">
+          <p class="kicker"><span>//05</span> Download / Free</p>
+          <h2 class="title">Get the<br />app</h2>
+          <p class="lede">Free for Windows, macOS and Linux. Create an account in the app and your phone companion is one link away.</p>
+          <div class="actions downloads">
+            <a class="pill" data-os="win" href="https://github.com/amarnathgaddam75/Productivity_Tracker-/releases/latest">Windows <span class="arrow">↓</span></a>
+            <a class="pill" data-os="mac" href="https://github.com/amarnathgaddam75/Productivity_Tracker-/releases/latest">macOS <span class="arrow">↓</span></a>
+            <a class="pill" data-os="linux" href="https://github.com/amarnathgaddam75/Productivity_Tracker-/releases/latest">Linux <span class="arrow">↓</span></a>
+            <a class="pill solid" href="/app/">Open web app <span class="arrow">↗</span></a>
+          </div>
+          <p class="fineprint meta" id="release-line">Latest release on GitHub</p>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

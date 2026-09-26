@@ -14,9 +14,9 @@ function Toggle({ checked, onChange, label, description }) {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 rounded-full transition ${checked ? 'bg-brand-600' : 'bg-slate-300 dark:bg-slate-700'}`}
+        className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 rounded-full border transition ${checked ? 'border-brand-300/60 bg-brand-400/30' : 'border-white/15 bg-transparent'}`}
       >
-        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${checked ? 'left-[22px]' : 'left-0.5'}`} />
+        <span className={`absolute top-[3px] h-4 w-4 rounded-full transition-all ${checked ? 'left-[23px] bg-brand-200' : 'left-[3px] bg-slate-500'}`} />
       </button>
     </label>
   );
@@ -51,7 +51,7 @@ export default function SettingsView() {
   return (
     <div className="grid max-w-4xl gap-6">
       <form onSubmit={save} className="card p-6">
-        <h2 className="font-semibold">Profile & goals</h2>
+        <h2 className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//01'}</span>Profile & goals</h2>
         <div className="mt-4 grid grid-cols-3 gap-4">
           <div>
             <label className="label" htmlFor="s-name">Display name</label>
@@ -107,7 +107,7 @@ export default function SettingsView() {
 
       <div className="card flex items-center justify-between gap-6 p-6">
         <div className="flex items-center gap-4">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-600 dark:text-brand-300"><Smartphone className="h-6 w-6" /></span>
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/10 text-brand-300"><Smartphone className="h-5 w-5" strokeWidth={1.5} /></span>
           <div>
             <div className="font-medium">Mobile companion</div>
             <div className="text-sm text-slate-500 dark:text-slate-400">

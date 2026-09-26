@@ -20,6 +20,7 @@
     "dist:linux": "vite build && electron-builder --linux"
   },
   "devDependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
     "@lifetracker/shared": "1.0.0",
     "@vitejs/plugin-react": "^6.0.0",
     "autoprefixer": "^10.4.21",
@@ -73,7 +74,8 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
+      "createDesktopShortcut": true,
+      "artifactName": "LifeTracker-${version}-win-x64-setup.${ext}"
     },
     "mac": {
       "target": [
@@ -101,7 +103,9 @@
     },
     "publish": null,
     "executableName": "lifetracker",
-    "artifactName": "LifeTracker-${version}-${os}-${arch}.${ext}"
-  },
-  "dependencies": {}
+    "artifactName": "LifeTracker-${version}-${os}-${arch}.${ext}",
+    "portable": {
+      "artifactName": "LifeTracker-${version}-win-x64-portable.${ext}"
+    }
+  }
 }

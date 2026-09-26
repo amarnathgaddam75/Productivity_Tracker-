@@ -9,7 +9,7 @@ export default function Toasts() {
       {toasts.slice(-2).map((t) => {
         const { icon: Icon, cls } = KIND_STYLE[t.kind] || KIND_STYLE.summary;
         return (
-          <button key={t.id} onClick={() => dismiss(t.id)} className="card pointer-events-auto flex animate-slide-down items-center gap-3 p-3 text-left shadow-xl">
+          <button key={t.id} onClick={() => dismiss(t.id)} className="card pointer-events-auto flex animate-slide-down items-center gap-3 bg-slate-900/90 p-3 text-left shadow-2xl">
             <span className={`flex h-9 w-9 shrink-0 animate-pop items-center justify-center rounded-xl ${cls}`}><Icon className="h-5 w-5" /></span>
             <div className="min-w-0">
               <div className="text-sm font-semibold">{t.title}</div>

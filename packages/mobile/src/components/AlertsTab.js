@@ -26,8 +26,8 @@ export default function AlertsTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between px-1">
-        <h2 className="font-semibold">Notifications</h2>
-        {notifications.length > 0 && <button onClick={clear} className="text-sm font-medium text-brand-600 dark:text-brand-400">Clear all</button>}
+        <h2 className="caps text-slate-300"><span className="mr-2 text-brand-300">{'//01'}</span>Notifications</h2>
+        {notifications.length > 0 && <button onClick={clear} className="caps text-brand-300">Clear all</button>}
       </div>
       {canAsk && (
         <button className="btn-soft w-full" onClick={() => Notification.requestPermission()}>
@@ -36,7 +36,7 @@ export default function AlertsTab() {
       )}
       {notifications.length === 0 ? (
         <div className="card flex flex-col items-center p-10 text-center text-sm text-slate-500">
-          <BellOff className="mb-2 h-8 w-8 text-slate-300" />
+          <BellOff className="mb-3 h-6 w-6 text-slate-500" strokeWidth={1.5} />
           No notifications yet. Completed tasks, time warnings and goal celebrations show up here.
         </div>
       ) : (
@@ -44,7 +44,7 @@ export default function AlertsTab() {
           {notifications.map((n) => {
             const { icon: Icon, cls } = KIND_STYLE[n.kind] || KIND_STYLE.summary;
             return (
-              <li key={n.id} className={`flex gap-3 p-4 ${n.read ? '' : 'bg-brand-50/60 dark:bg-brand-500/5'}`}>
+              <li key={n.id} className={`flex gap-3 p-4 ${n.read ? '' : 'bg-brand-400/[0.06]'}`}>
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${cls}`}><Icon className="h-5 w-5" /></span>
                 <div className="min-w-0 flex-1">
                   <div className="flex justify-between gap-2">

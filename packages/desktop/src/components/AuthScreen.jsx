@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { signIn, signUp, resetPassword, authErrorMessage } from '@lifetracker/shared';
 import { CheckCircle2, BarChart3, Timer, Smartphone, Loader2 } from 'lucide-react';
-import { Logo } from './ui.jsx';
+import { Logo, Orb } from './ui.jsx';
 import { useStore } from '../config.js';
 
 const FEATURES = [
-  { icon: CheckCircle2, text: 'Plan tasks with time estimates' },
-  { icon: Timer, text: 'Track real time with one-click timers' },
-  { icon: BarChart3, text: 'Daily reports, scores and efficiency' },
-  { icon: Smartphone, text: 'Syncs with your phone, works offline' },
+  { icon: CheckCircle2, text: 'Tasks with estimates' },
+  { icon: Timer, text: 'One-click timers' },
+  { icon: BarChart3, text: 'Daily reports' },
+  { icon: Smartphone, text: 'Phone sync, offline' },
 ];
 
 export default function AuthScreen() {
@@ -50,35 +50,33 @@ export default function AuthScreen() {
   };
 
   return (
-    <div className="grid h-full lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden bg-gradient-to-br from-brand-700 via-brand-600 to-violet-600 p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative flex items-center gap-2 text-lg font-semibold">
-          <Timer className="h-6 w-6" /> LifeTracker
-        </div>
+    <div className="grid h-full lg:grid-cols-[1.25fr_1fr]">
+      <div className="relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between lg:p-12">
+        <Orb state={{ shape: 'sphere', color: '#a78bfa', energy: 0.45 }} count={80000} scale={0.7} className="absolute inset-y-0 right-0 w-[72%]" />
+        <Logo className="relative" sub="Productivity tracker / Desktop + mobile" />
         <div className="relative">
-          <h2 className="text-4xl font-semibold leading-tight">Own your day.<br />One focused hour at a time.</h2>
-          <ul className="mt-8 space-y-4">
+          <p className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//00'}</span>Plan / Track / Progress / Sync</p>
+          <h2 className="font-display mt-5 text-8xl leading-[0.88]">Own<br />your day</h2>
+          <ul className="mt-10 grid max-w-md grid-cols-2 gap-x-8 gap-y-3">
             {FEATURES.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-center gap-3 text-brand-50">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15">
-                  <Icon className="h-5 w-5" />
-                </span>
+              <li key={text} className="flex items-center gap-3 text-sm text-slate-300">
+                <Icon className="h-4 w-4 shrink-0 text-brand-300" strokeWidth={1.5} />
                 {text}
               </li>
             ))}
           </ul>
         </div>
-        <p className="relative text-sm text-brand-100">Your data is private to your account and synced securely with Firebase.</p>
+        <p className="caps relative text-slate-500">Private to your account / Synced with Firebase</p>
       </div>
 
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center border-l border-white/[0.06] p-8">
         <form onSubmit={submit} className="w-full max-w-sm" noValidate>
-          <Logo className="mb-8 lg:hidden" />
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <Logo className="mb-10 lg:hidden" />
+          <p className="caps text-slate-500"><span className="mr-2 text-brand-300">{'//'}{mode === 'signup' ? '01' : mode === 'reset' ? '02' : '00'}</span>{mode === 'signup' ? 'New account' : mode === 'reset' ? 'Recovery' : 'Sign in'}</p>
+          <h1 className="font-display mt-3 text-4xl leading-none">
             {mode === 'signup' ? 'Create your account' : mode === 'reset' ? 'Reset password' : 'Welcome back'}
           </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-4 text-sm text-slate-400">
             {mode === 'signup'
               ? 'Start tracking your productivity in seconds.'
               : mode === 'reset'
@@ -102,7 +100,7 @@ export default function AuthScreen() {
                 <div className="flex items-center justify-between">
                   <label className="label" htmlFor="password">Password</label>
                   {mode === 'login' && (
-                    <button type="button" className="mb-1 text-xs font-medium text-brand-600 hover:underline dark:text-brand-400" onClick={() => switchMode('reset')}>
+                    <button type="button" className="mb-1 text-xs font-medium text-brand-300 hover:underline" onClick={() => switchMode('reset')}>
                       Forgot password?
                     </button>
                   )}
@@ -112,17 +110,17 @@ export default function AuthScreen() {
             )}
           </div>
 
-          {error && <div role="alert" className="mt-4 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</div>}
-          {info && <div className="mt-4 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">{info}</div>}
+          {error && <div role="alert" className="mt-4 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">{error}</div>}
+          {info && <div className="mt-4 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">{info}</div>}
 
-          <button type="submit" className="btn-primary mt-6 w-full py-2.5" disabled={busy}>
+          <button type="submit" className="btn-primary mt-8 w-full py-3" disabled={busy}>
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
             {mode === 'signup' ? 'Create account' : mode === 'reset' ? 'Send reset link' : 'Log in'}
           </button>
 
           <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
             {mode === 'signup' ? 'Already have an account?' : mode === 'reset' ? 'Remembered it?' : 'New to LifeTracker?'}{' '}
-            <button type="button" className="font-medium text-brand-600 hover:underline dark:text-brand-400" onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}>
+            <button type="button" className="font-medium text-brand-300 hover:underline" onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}>
               {mode === 'login' ? 'Create an account' : 'Log in'}
             </button>
           </p>
