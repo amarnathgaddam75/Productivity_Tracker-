@@ -46,7 +46,7 @@ export default function TimerHero() {
         {!task ? (
           <>
             <p className="caps text-slate-400">
-              <span className="mr-2 text-brand-300">//00</span>Timer / idle
+              <span className="mr-2 text-brand-300">{'//00'}</span>Timer / idle
             </p>
             <div>
               <h2 className="font-display text-6xl leading-[0.9]">Ready<br />when you are</h2>
@@ -66,7 +66,7 @@ export default function TimerHero() {
           <>
             <div className="flex items-center gap-3">
               <p className="caps text-slate-400">
-                <span className={`mr-2 ${accent}`}>//{isRunning ? '01' : '00'}</span>
+                <span className={`mr-2 ${accent}`}>{'//'}{isRunning ? '01' : '00'}</span>
                 {isRunning ? 'Now tracking' : 'Paused'}
               </p>
               {isRunning && <span className={`h-1.5 w-1.5 animate-pulse rounded-full ${over ? 'bg-rose-400' : warn ? 'bg-amber-300' : 'bg-brand-300'}`} />}

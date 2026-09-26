@@ -77,7 +77,7 @@ export default function ReportsView() {
           <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-400/20 blur-3xl" />
           <div className="relative flex h-full flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="caps text-slate-400"><span className="mr-2 text-brand-300">//05</span>Daily motivation</span>
+              <span className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//05'}</span>Daily motivation</span>
               <button className="icon-btn" onClick={() => setSeed((n) => n + 1)} title="Another message" aria-label="Another message">
                 <Shuffle className="h-3.5 w-3.5" />
               </button>
@@ -92,11 +92,11 @@ export default function ReportsView() {
 
       <div className="grid grid-cols-5 gap-4">
         <div className="card col-span-2 p-6">
-          <h3 className="caps text-slate-400"><span className="mr-2 text-brand-300">//06</span>Hours / last 7 days</h3>
+          <h3 className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//06'}</span>Hours / last 7 days</h3>
           <WeekChart history={history} goal={goalHours} selected={day} onSelect={setDay} today={today} />
         </div>
         <div className="card col-span-3 p-6">
-          <h3 className="caps text-slate-400"><span className="mr-2 text-brand-300">//07</span>Estimated vs actual</h3>
+          <h3 className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//07'}</span>Estimated vs actual</h3>
           {report.perTask.length === 0 ? (
             <EmptyState icon={BarChart3} title="No tasks for this day">Tasks you plan or track time on will appear here.</EmptyState>
           ) : (

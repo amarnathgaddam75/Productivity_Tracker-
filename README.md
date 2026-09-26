@@ -2,9 +2,20 @@
 
 **A cross-platform productivity tracker.** Plan your day as tasks with time estimates, track the time you really spend on each one, and get daily reports on how the day went. The desktop app runs on Windows, macOS and Linux. A mobile companion (an installable PWA) keeps your phone in sync through Firebase, and both apps keep working offline.
 
+**Live:** [lifetracker-90c0b.web.app](https://lifetracker-90c0b.web.app) (landing page) · [/app](https://lifetracker-90c0b.web.app/app/) (mobile web app) · [Downloads](https://github.com/amarnathgaddam75/Productivity_Tracker-/releases/latest)
+
+| Landing — hero | Landing — timer section |
+| --- | --- |
+| <img src="docs/screenshots/landing-hero.png" width="420"> | <img src="docs/screenshots/landing-timer.png" width="420"> |
+
 | Desktop — tasks & timer | Desktop — daily report | Mobile — now | Mobile — today |
 | --- | --- | --- | --- |
 | <img src="docs/screenshots/desktop-tasks.png" width="320"> | <img src="docs/screenshots/desktop-reports.png" width="320"> | <img src="docs/screenshots/mobile-now.png" width="140"> | <img src="docs/screenshots/mobile-summary.png" width="140"> |
+
+## Design
+Every surface shares one visual language: a near-black violet canvas, **Archivo** at weight 100 and 125% width for display type, tiny spaced-out `//NN` labels, pill buttons and hairline rules. At its centre is a **WebGL particle body** (`packages/shared/src/orb.js`, no dependencies). Tens of thousands of additive-blended points morph between a sphere, a cube, a clock face, a spiral and two linked orbs, drift with a gentle swirl and scatter from the cursor. When WebGL isn't available it falls back to a CSS glow, and it respects `prefers-reduced-motion`.
+- **Landing page:** a scroll-driven story with one shape per section (plan, track, progress, sync, download). The download buttons link to the latest GitHub release assets.
+- **Apps:** the timer *is* the orb. It forms a spinning particle clock while a task is tracked, turns amber when about an hour is left and rose when over the estimate, and settles into a dim sphere when paused.
 
 ## Features
 
@@ -55,8 +66,9 @@ productivity-tracker/
 │   ├── desktop/          Electron + React (Vite, Tailwind)
 │   │   ├── electron/     main process (app:// protocol, notifications, badge) + preload bridge
 │   │   └── src/          renderer UI
-│   ├── mobile/           React PWA (create-react-app, Tailwind, Workbox service worker)
-│   └── shared/           Firebase setup, Zustand store, timer/report/sync logic + unit tests
+│   ├── landing/          Landing page (Vite, vanilla JS) served at /
+│   ├── mobile/           React PWA (create-react-app, Tailwind, Workbox) served at /app
+│   └── shared/           Firebase setup, Zustand store, timer/report/sync logic, WebGL orb + unit tests
 ├── firebase/             Firestore security rules + indexes
 ├── .github/workflows/    CI, desktop installers (release), PWA deploy
 ├── firebase.json         Hosting (PWA) + emulator config
@@ -76,7 +88,8 @@ npm run emulators             # terminal 1 — Auth + Firestore emulators
 echo "VITE_FIREBASE_EMULATOR_HOST=127.0.0.1" > packages/desktop/.env.local
 echo "REACT_APP_FIREBASE_EMULATOR_HOST=127.0.0.1" > packages/mobile/.env.local
 npm run dev:desktop           # terminal 2 — Electron app with hot reload
-npm run dev:mobile            # terminal 3 — PWA at http://localhost:3000
+npm run dev:mobile            # terminal 3 — PWA at http://localhost:3000/app
+npm run dev:landing           # (optional) landing page at http://localhost:5174
 ```
 
 For a real Firebase project, building the installers and deploying the PWA, see **[SETUP.md](SETUP.md)**.

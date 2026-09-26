@@ -93,7 +93,7 @@ export function StatCard({ icon: Icon, label, value, sub, index, accent = 'text-
     <div className="card p-5">
       <div className="flex items-center justify-between">
         <span className="caps text-slate-400">
-          {index && <span className={`mr-2 ${accent}`}>//{index}</span>}
+          {index && <span className={`mr-2 ${accent}`}>{'//'}{index}</span>}
           {label}
         </span>
         <Icon className={`h-4 w-4 ${accent}`} strokeWidth={1.5} />

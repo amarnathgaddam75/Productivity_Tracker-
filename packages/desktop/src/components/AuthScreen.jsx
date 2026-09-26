@@ -55,7 +55,7 @@ export default function AuthScreen() {
         <Orb state={{ shape: 'sphere', color: '#a78bfa', energy: 0.45 }} count={80000} scale={0.7} className="absolute inset-y-0 right-0 w-[72%]" />
         <Logo className="relative" sub="Productivity tracker / Desktop + mobile" />
         <div className="relative">
-          <p className="caps text-slate-400"><span className="mr-2 text-brand-300">//00</span>Plan / Track / Progress / Sync</p>
+          <p className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//00'}</span>Plan / Track / Progress / Sync</p>
           <h2 className="font-display mt-5 text-8xl leading-[0.88]">Own<br />your day</h2>
           <ul className="mt-10 grid max-w-md grid-cols-2 gap-x-8 gap-y-3">
             {FEATURES.map(({ icon: Icon, text }) => (
@@ -72,7 +72,7 @@ export default function AuthScreen() {
       <div className="flex items-center justify-center border-l border-white/[0.06] p-8">
         <form onSubmit={submit} className="w-full max-w-sm" noValidate>
           <Logo className="mb-10 lg:hidden" />
-          <p className="caps text-slate-500"><span className="mr-2 text-brand-300">//{mode === 'signup' ? '01' : mode === 'reset' ? '02' : '00'}</span>{mode === 'signup' ? 'New account' : mode === 'reset' ? 'Recovery' : 'Sign in'}</p>
+          <p className="caps text-slate-500"><span className="mr-2 text-brand-300">{'//'}{mode === 'signup' ? '01' : mode === 'reset' ? '02' : '00'}</span>{mode === 'signup' ? 'New account' : mode === 'reset' ? 'Recovery' : 'Sign in'}</p>
           <h1 className="font-display mt-3 text-4xl leading-none">
             {mode === 'signup' ? 'Create your account' : mode === 'reset' ? 'Reset password' : 'Welcome back'}
           </h1>

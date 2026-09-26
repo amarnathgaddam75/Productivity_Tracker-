@@ -51,7 +51,7 @@ export default function SettingsView() {
   return (
     <div className="grid max-w-4xl gap-6">
       <form onSubmit={save} className="card p-6">
-        <h2 className="caps text-slate-400"><span className="mr-2 text-brand-300">//01</span>Profile & goals</h2>
+        <h2 className="caps text-slate-400"><span className="mr-2 text-brand-300">{'//01'}</span>Profile & goals</h2>
         <div className="mt-4 grid grid-cols-3 gap-4">
           <div>
             <label className="label" htmlFor="s-name">Display name</label>
