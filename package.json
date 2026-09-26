@@ -1,0 +1,31 @@
+{
+  "name": "lifetracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LifeTracker — cross-platform productivity tracker (Electron desktop + React PWA + Firebase)",
+  "workspaces": [
+    "packages/shared",
+    "packages/desktop",
+    "packages/mobile"
+  ],
+  "scripts": {
+    "test": "npm run test -w @lifetracker/shared",
+    "dev:desktop": "npm run dev -w @lifetracker/desktop",
+    "dev:web": "npm run dev:web -w @lifetracker/desktop",
+    "dev:mobile": "npm run start -w @lifetracker/mobile",
+    "build:desktop": "npm run build -w @lifetracker/desktop",
+    "build:mobile": "npm run build -w @lifetracker/mobile",
+    "dist:win": "npm run dist:win -w @lifetracker/desktop",
+    "dist:mac": "npm run dist:mac -w @lifetracker/desktop",
+    "dist:linux": "npm run dist:linux -w @lifetracker/desktop",
+    "emulators": "firebase emulators:start --only auth,firestore --project demo-lifetracker",
+    "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes",
+    "deploy:mobile": "npm run build:mobile && firebase deploy --only hosting"
+  },
+  "devDependencies": {
+    "firebase-tools": "^15.31.0"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}
