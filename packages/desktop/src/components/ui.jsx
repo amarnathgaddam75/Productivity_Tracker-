@@ -30,7 +30,7 @@ export function ProgressRing({ value, size = 120, stroke = 10, className = '', c
     <div className={`relative inline-flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={stroke} className="fill-none stroke-slate-200 dark:stroke-slate-800" />
-        {v > 0 && <circle
+        {v > 0.005 && <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
