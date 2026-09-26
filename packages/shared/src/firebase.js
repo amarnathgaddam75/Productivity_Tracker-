@@ -136,10 +136,10 @@ export function firestoreAdapter(uid) {
  * Real-time listener for a user sub-collection.
  * @param {(changes: Array<{id, type, data}>) => void} onChanges
  */
-export function subscribeCollection(uid, name, onChanges, onError, { max } = {}) {
+export function subscribeCollection(uid, name, onChanges, onError, { max, orderField = 'date' } = {}) {
   const { db } = getServices();
   let ref = collection(db, 'users', uid, name);
-  if (max) ref = query(ref, orderBy('date', 'desc'), limit(max));
+  if (max) ref = query(ref, orderBy(orderField, 'desc'), limit(max));
   return onSnapshot(
     ref,
     (snap) => {

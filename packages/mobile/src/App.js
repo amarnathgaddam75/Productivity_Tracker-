@@ -6,6 +6,8 @@ import Header from './components/Header';
 import NowTab from './components/NowTab';
 import SummaryTab from './components/SummaryTab';
 import AlertsTab from './components/AlertsTab';
+import AssistantTab from './components/AssistantTab';
+import { phoneTick } from './phoneBrain';
 import BottomNav from './components/BottomNav';
 import Toasts from './components/Toasts';
 import Scene from './components/Scene';
@@ -37,7 +39,14 @@ function UpdateBanner() {
 function TrackedApp() {
   useTrackerLifecycle(useStore);
   const status = useStore((s) => s.status);
-  const [tab, setTab] = useState('now');
+  const [tab, setTab] = useState('assistant');
+
+  useEffect(() => {
+    if (status !== 'ready') return undefined;
+    phoneTick();
+    const id = setInterval(() => phoneTick(), 5000);
+    return () => clearInterval(id);
+  }, [status]);
 
   if (status === 'loading') return <Splash />;
   if (status === 'signedOut') return <Login />;
@@ -48,6 +57,7 @@ function TrackedApp() {
       <Header />
       <UpdateBanner />
       <main className="relative z-10 flex-1 overflow-y-auto px-4 pb-28 pt-2">
+        {tab === 'assistant' && <AssistantTab />}
         {tab === 'now' && <NowTab />}
         {tab === 'summary' && <SummaryTab />}
         {tab === 'alerts' && <AlertsTab />}

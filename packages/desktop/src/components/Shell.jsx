@@ -14,7 +14,7 @@ import CommandBar from './CommandBar.jsx';
 import { useAssistantRuntime } from '../assistant/runtime.js';
 
 const NAV = [
-  { id: 'assistant', label: 'Assistant', kicker: 'Briefing / Live' },
+  { id: 'assistant', label: 'Assistant', kicker: 'Talk / Live' },
   { id: 'tasks', label: 'Tasks', kicker: 'Plan / Track' },
   { id: 'reports', label: 'Reports', kicker: 'Progress / Insight' },
   { id: 'settings', label: 'Settings', kicker: 'Profile / Sync' },
@@ -147,13 +147,18 @@ export default function Shell() {
         }}
       >
         <div className="mx-auto max-w-[1180px] px-10 pb-40 pl-10 pr-24 pt-32">
-          <p className="caps text-slate-400">
-            <span className="mr-2 text-[var(--accent)]">{`//0${index + 1}`}</span>
-            {nav.kicker}
-          </p>
-          <h1 className="font-display mb-10 mt-3 text-[92px] leading-[0.88]" style={{ textShadow: '0 0 28px rgba(7,5,13,.8)' }}>
-            {view === 'assistant' ? assistantName : nav.label}
-          </h1>
+          {view !== 'assistant' && (
+            <>
+              <p className="caps text-slate-400">
+                <span className="mr-2 text-[var(--accent)]">{`//0${index + 1}`}</span>
+                {nav.kicker}
+              </p>
+              <h1 className="font-display mb-10 mt-3 text-[92px] leading-[0.88]" style={{ textShadow: '0 0 28px rgba(7,5,13,.8)' }}>
+                {nav.label}
+              </h1>
+            </>
+          )}
+          {view === 'assistant' && <h1 className="sr-only">{assistantName}</h1>}
           <div key={view} className="animate-slide-in">
             {view === 'assistant' && <AssistantView />}
             {view === 'tasks' && <TasksView />}

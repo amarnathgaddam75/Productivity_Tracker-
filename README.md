@@ -46,6 +46,24 @@ Every surface shares one visual language: a near-black violet canvas, **Archivo*
   - A notification centre with an unread badge (also shown on the dock or taskbar).
 - **Sync:** live Firestore listeners, instant (optimistic) UI updates, last-write-wins conflict resolution, and a sync status indicator.
 
+### The assistant (laptop + phone)
+A Jarvis-style assistant (named Atlas; rename it in Settings) is the home screen of both apps.
+- **Talk or type:** click the mic (or press **Ctrl+Shift+J** from anywhere) on the laptop, tap the mic on the phone, or type. It understands normal sentences and answers general questions.
+- **It acts for you:** add, start, pause, finish, move and delete tasks. It can also set reminders ("remind me at 5 to call mom"), remember facts about you, change settings, give reports ("how was my week?") and the weather. On the laptop it can open websites and apps.
+- **Brains** (Settings → Brain, chosen per laptop):
+  | Brain | Cost | Notes |
+  | --- | --- | --- |
+  | Built-in | free, offline | Understands commands only |
+  | Google Gemini | free API key ([aistudio.google.com/apikey](https://aistudio.google.com/apikey)) | Recommended; also enables laptop voice input |
+  | Groq | free API key | Fast; also enables laptop voice input |
+  | Ollama | free, runs on your laptop | Install from ollama.com, then run `ollama pull qwen3:8b` |
+  | Claude, OpenAI, OpenRouter, custom OpenAI-compatible (LM Studio) | paid or your own server | |
+
+  API keys are stored encrypted on the laptop (Electron `safeStorage`). They are only sent to the provider's own host.
+- **One conversation everywhere:** the chat is synced. Questions asked on the phone are answered by your laptop's brain while the desktop app runs. Otherwise the phone answers with the built-in brain, or with its own key if you add one.
+- **Learns your habits:** when you usually start, your best focus hours, how long tasks really take compared with your estimates, your streak, and the tasks you repeat. On an empty day it suggests those tasks, and it uses your habits when planning.
+- **Proactive:** it gives a morning briefing, pauses the timer automatically when you're away, and nudges you when you're working untracked or on distractions. It also checks in, warns about pace, gives an end-of-day report and fires reminders. Everything is spoken aloud and pushed to the phone.
+
 ### Mobile companion (React PWA, create-react-app + Workbox)
 - Log in with the same account.
 - See the running task with a live timer, and pause or resume it with **one tap**.
@@ -108,7 +126,12 @@ users/{uid}/tasks/{taskId}          { id, title, estimatedHours, completed, comp
 users/{uid}/summaries/{YYYY-MM-DD}  { totalTasks, completedTasks, hoursWorked, estimatedHours,
                                       productivityScore, efficiency, goalHours, goalReached, updatedAt }
 users/{uid}/meta/settings           { displayName, dailyGoalHours, summaryHour, carryOver,
-                                      autoStartNext, systemNotifications, updatedAt }
+                                      autoStartNext, systemNotifications, assistant options, city, updatedAt }
+users/{uid}/meta/presence           what the laptop is doing now + whether it answers the phone
+users/{uid}/meta/push, devices/{id} Web Push keys and subscribed phones
+users/{uid}/reminders/{id}          { text, at, done, firedAt?, deleted, createdAt, updatedAt }
+users/{uid}/memories/{id}           { text, deleted, createdAt, updatedAt }
+users/{uid}/chat/{id}               { role, text, from, status, replyTo?, actions?, deleted, createdAt, updatedAt }
 ```
 
 Times are epoch milliseconds. The security rules are in [`firebase/firestore.rules`](firebase/firestore.rules). Users can read and write only their own documents, every field is validated, and an update is refused if it would replace a newer version with an older one.
@@ -129,5 +152,5 @@ React 18 · Electron · Vite · create-react-app (PWA) · Workbox · Firebase Au
 
 ## Known limitations
 - Last-write-wins uses each device's clock. If a device's clock is badly wrong, its edits can win or lose unexpectedly.
-- Notifications only fire while an app is open (in the foreground or background). There is no server push, by design: no external services are used.
+- There is no server. Phone push, reminders and phone questions answered by the AI all need the desktop app running (it can run in the tray). Without it, the phone falls back to its built-in brain and fires reminders only while the phone app is open.
 - The installers are unsigned unless you add code-signing certificates. Windows SmartScreen and macOS Gatekeeper will show a warning the first time the app is opened (see SETUP.md).

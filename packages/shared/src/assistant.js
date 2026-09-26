@@ -376,7 +376,7 @@ export class Coach {
       m.wrapped = today;
       const b = buildBriefing({ tasks, today, settings, now, name });
       const r = b.report;
-      out.push({ kind: 'report', key: `wrap:${today}`, title: 'End of day report', body: `${r.completedTasks}/${r.totalTasks} tasks · ${dur(r.hoursWorked * MS_HOUR)} focused · score ${r.productivityScore}%. ${b.plan.length ? `${plural(b.plan.length, 'task')} will carry over to tomorrow.` : 'Everything is done.'}`, speak: `That's the end of your work day${who}. You finished ${r.completedTasks} of ${r.totalTasks} tasks and focused for ${dur(r.hoursWorked * MS_HOUR)}.` });
+      if (r.totalTasks || r.hoursWorked) out.push({ kind: 'report', key: `wrap:${today}`, title: 'End of day report', body: `${r.completedTasks}/${r.totalTasks} tasks · ${dur(r.hoursWorked * MS_HOUR)} focused · score ${r.productivityScore}%. ${b.plan.length ? `${plural(b.plan.length, 'task')} will carry over to tomorrow.` : 'Everything is done.'}`, speak: `That's the end of your work day${who}. You finished ${r.completedTasks} of ${r.totalTasks} tasks and focused for ${dur(r.hoursWorked * MS_HOUR)}.` });
     }
     return out;
   }

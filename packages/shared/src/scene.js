@@ -43,7 +43,10 @@ export function sceneOrbState(view, info, extra = {}) {
   switch (view) {
     case 'assistant': {
       const color = { ahead: '#6ee7b7', done: '#6ee7b7', behind: '#fbbf24', idle: '#a78bfa' }[extra.status] || '#a78bfa';
-      return extra.speaking
+      // listening -> bright cyan pulse, thinking -> swirling galaxy, speaking -> energetic sphere
+      if (extra.mode === 'listening') return { shape: 'sphere', color: '#67e8f9', energy: 1.6, brightness: 1.45 };
+      if (extra.mode === 'thinking') return { shape: 'galaxy', color: '#c4b5fd', energy: 1.1, brightness: 1.2 };
+      return extra.speaking || extra.mode === 'speaking'
         ? { shape: 'sphere', color, energy: 1.2, brightness: 1.3 }
         : { shape: 'sphere', color, energy: 0.55, brightness: 1 };
     }

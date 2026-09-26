@@ -20,9 +20,10 @@ export default function Scene({ view, offset = [0.42, 0] }) {
   const today = useStore((s) => s.today);
   const settings = useStore((s) => s.settings);
   const speaking = useAssistant((s) => s.speaking);
+  const mode = useAssistant((s) => s.mode);
   const info = activeTimer(tasks, today, now);
   const status = view === 'assistant' ? buildBriefing({ tasks, today, settings, now }).status : null;
-  const state = { ...sceneOrbState(view, info, { status, speaking }), offset };
+  const state = { ...sceneOrbState(view, info, { status, speaking, mode }), offset };
 
   // Burst when a task gets completed.
   const [burst, setBurst] = useState(0);

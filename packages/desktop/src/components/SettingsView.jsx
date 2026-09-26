@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Bell, Smartphone, Save, Download } from 'lucide-react';
 import { useStore, mobileUrl, isElectron } from '../config.js';
 import AssistantSettings from './AssistantSettings.jsx';
+import BrainSettings from './BrainSettings.jsx';
 
 function Toggle({ checked, onChange, label, description }) {
   return (
@@ -76,6 +77,8 @@ export default function SettingsView() {
           {saved && <span className="text-sm text-emerald-600 dark:text-emerald-400">Saved ✓</span>}
         </div>
       </form>
+
+      <BrainSettings />
 
       <AssistantSettings />
 

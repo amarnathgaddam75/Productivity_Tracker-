@@ -78,7 +78,7 @@ export default function AssistantSettings() {
   return (
     <>
       <form onSubmit={save} className="card p-6">
-        <h2 className="caps text-slate-400"><span className="mr-2 text-[var(--accent)]">{'//02'}</span>Assistant</h2>
+        <h2 className="caps text-slate-400"><span className="mr-2 text-[var(--accent)]">{'//04'}</span>Assistant</h2>
         <div className="mt-5 grid grid-cols-3 gap-4">
           <div>
             <label className="label" htmlFor="a-name">Assistant name</label>
@@ -144,7 +144,7 @@ export default function AssistantSettings() {
 
       <div className="card p-6">
         <div className="flex items-baseline justify-between">
-          <h2 className="caps text-slate-400"><span className="mr-2 text-[var(--accent)]">{'//03'}</span>Phone notifications</h2>
+          <h2 className="caps text-slate-400"><span className="mr-2 text-[var(--accent)]">{'//05'}</span>Phone notifications</h2>
           <Switch label="Send to phone" checked={settings.pushToPhone !== false} onChange={(v) => update({ pushToPhone: v })} />
         </div>
         <p className="mt-3 max-w-2xl text-sm text-slate-400">

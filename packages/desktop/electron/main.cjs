@@ -5,12 +5,13 @@
 // the renderer has a stable, secure origin (needed for IndexedDB/localStorage
 // persistence used by Firebase Auth and the offline queue).
 
-const { app, BrowserWindow, Notification, ipcMain, protocol, shell, Menu, net, Tray, nativeImage, globalShortcut } = require('electron');
+const { app, BrowserWindow, Notification, ipcMain, protocol, shell, Menu, net, Tray, nativeImage, globalShortcut, session, systemPreferences } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
 const { pathToFileURL } = require('node:url');
 const activity = require('./activity.cjs');
+const system = require('./system.cjs');
 
 const DEV_URL = process.env.VITE_DEV_SERVER_URL;
 const DIST = path.join(__dirname, '..', 'dist');
@@ -22,7 +23,8 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data:",
   "font-src 'self' data:",
-  "connect-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com",
+  "connect-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://api.open-meteo.com https://geocoding-api.open-meteo.com",
+  "media-src 'self' blob:",
 ].join('; ');
 
 // Many Linux GPU drivers are blocklisted by Chromium, which disables WebGL and
@@ -153,6 +155,7 @@ function buildTray() {
         { label: trayState.running ? 'Pause timer' : 'Start / resume next task', click: () => send('assistant-command', trayState.running ? 'pause' : 'start') },
         { label: 'Briefing — what’s left?', click: () => { showWindow(); send('assistant-command', 'status'); } },
         { label: 'Ask the assistant…  (Ctrl+Shift+Space)', click: () => { showWindow(); send('command-bar'); } },
+        { label: 'Talk to the assistant  (Ctrl+Shift+J)', click: () => { showWindow(); send('voice'); } },
         { type: 'separator' },
         { label: 'Open LifeTracker', click: showWindow },
         { label: 'Quit', click: () => { quitting = true; app.quit(); } },
@@ -266,7 +269,20 @@ ipcMain.on('badge', (_e, count) => {
   if (process.platform === 'win32' && mainWindow) mainWindow.flashFrame(n > 0 && !mainWindow.isFocused());
 });
 
+// ---- assistant brain + laptop powers ------------------------------------------------
+ipcMain.handle('llm:request', (_e, payload) => system.llmRequest(payload));
+ipcMain.handle('llm:set-key', (_e, { provider, key } = {}) => system.setKey(String(provider), key ? String(key).trim() : ''));
+ipcMain.handle('llm:key-status', () => system.keyStatus());
+ipcMain.handle('system:open-url', (_e, url) => system.openUrl(String(url)));
+ipcMain.handle('system:open-app', (_e, name) => system.openApp(String(name)));
+ipcMain.handle('mic:access', async () => {
+  if (process.platform !== 'darwin') return true;
+  return systemPreferences.askForMediaAccess('microphone');
+});
+
 app.whenReady().then(() => {
+  // Only the microphone (voice commands) and notifications are ever granted.
+  session.defaultSession.setPermissionRequestHandler((_wc, permission, cb) => cb(['media', 'notifications', 'clipboard-sanitized-write'].includes(permission)));
   registerAppProtocol();
   buildMenu();
   createWindow();
@@ -277,6 +293,10 @@ app.whenReady().then(() => {
     send('command-bar');
   });
   globalShortcut.register('CommandOrControl+Shift+P', () => send('assistant-command', trayState.running ? 'pause' : 'start'));
+  globalShortcut.register('CommandOrControl+Shift+J', () => {
+    showWindow();
+    send('voice');
+  });
   app.on('activate', showWindow);
 });
 

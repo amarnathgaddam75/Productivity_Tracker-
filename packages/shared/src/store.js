@@ -44,6 +44,7 @@ export const DEFAULT_SETTINGS = {
   shareTitles: false,
   runInBackground: true,
   startAtLogin: false,
+  city: '',
   updatedAt: 0,
 };
 
@@ -72,6 +73,13 @@ function clean(obj) {
   const out = {};
   for (const [k, v] of Object.entries(obj)) if (v !== undefined) out[k] = v;
   return out;
+}
+
+const CHAT_KEEP = 80;
+function pruneChat(map) {
+  const list = Object.values(map);
+  if (list.length <= CHAT_KEEP) return map;
+  return Object.fromEntries(list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, CHAT_KEEP).map((m) => [m.id, m]));
 }
 
 /** Sort: running first, then incomplete (oldest first), then completed (newest first). */
@@ -170,6 +178,33 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
       set({ devices });
     };
 
+    /** Apply snapshot changes to a keyed map in state (tombstones are kept so LWW still works). */
+    const applyMapChanges = (key) => (changes) => {
+      const map = { ...get()[key] };
+      for (const c of changes) {
+        if (c.type === 'removed') delete map[c.id];
+        else {
+          const pending = queue?.pendingUpdatedAt(`${key}/${c.id}`);
+          if (pending != null && pending > (c.data?.updatedAt || 0)) continue;
+          const cur = map[c.id];
+          if (!cur || (c.data?.updatedAt || 0) >= (cur.updatedAt || 0)) map[c.id] = { ...c.data, id: c.id };
+        }
+      }
+      const kept = key === 'chat' ? pruneChat(map) : map;
+      set({ [key]: kept });
+      saveCache(key, kept);
+    };
+
+    /** Optimistic write of a doc in one of the simple collections (reminders, memories, chat). */
+    const writeDoc = (key, doc) => {
+      const now = Date.now();
+      const next = clean({ ...doc, updatedAt: Math.max(now, (doc.updatedAt || 0) + 1) });
+      set((s) => ({ [key]: { ...s[key], [next.id]: next } }));
+      saveCache(key, get()[key]);
+      queue?.enqueue(`${key}/${next.id}`, next);
+      return next;
+    };
+
     // ---- daily rollover ------------------------------------------------------
     const rollover = (today, now) => {
       if (get().settings.carryOver) {
@@ -201,6 +236,9 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
       pushKeys: null,
       pushKeysLoaded: false,
       presence: null,
+      reminders: {},
+      memories: {},
+      chat: {},
       notifications: [],
       toasts: [],
       sync: { status: 'synced', pending: 0 },
@@ -240,6 +278,9 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
           tasks: storage.get(cacheKey(user.uid, 'tasks'), {}) || {},
           settings: { ...DEFAULT_SETTINGS, ...(storage.get(cacheKey(user.uid, 'settings'), {}) || {}) },
           summaries: storage.get(cacheKey(user.uid, 'summaries'), {}) || {},
+          reminders: storage.get(cacheKey(user.uid, 'reminders'), {}) || {},
+          memories: storage.get(cacheKey(user.uid, 'memories'), {}) || {},
+          chat: storage.get(cacheKey(user.uid, 'chat'), {}) || {},
           notifications: storage.get(cacheKey(user.uid, 'notifications'), []) || [],
           toasts: [],
           status: 'ready',
@@ -260,6 +301,9 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
             subscribeCollection(user.uid, 'devices', applyDeviceChanges, onErr),
             subscribeDoc(user.uid, 'meta/push', (d) => set({ pushKeys: d, pushKeysLoaded: true }), onErr),
             subscribeDoc(user.uid, 'meta/presence', (d) => set({ presence: d }), onErr),
+            subscribeCollection(user.uid, 'reminders', applyMapChanges('reminders'), onErr, { max: 100, orderField: 'at' }),
+            subscribeCollection(user.uid, 'memories', applyMapChanges('memories'), onErr),
+            subscribeCollection(user.uid, 'chat', applyMapChanges('chat'), onErr, { max: 60, orderField: 'createdAt' }),
           ];
         }
         rollover(today, Date.now());
@@ -280,6 +324,9 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
           pushKeys: null,
           pushKeysLoaded: false,
           presence: null,
+          reminders: {},
+          memories: {},
+          chat: {},
           notifications: [],
           toasts: [],
           settings: { ...DEFAULT_SETTINGS },
@@ -440,6 +487,66 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
         const doc = clean({ ...p, updatedAt: Date.now() });
         set({ presence: doc });
         queue?.enqueue('meta/presence', doc);
+      },
+
+      // ---- reminders, memory, chat (assistant) -----------------------------------
+      addReminder({ text, at }) {
+        const t = String(text || '').trim().slice(0, 200);
+        if (!t || !Number.isFinite(at)) return null;
+        const now = Date.now();
+        return writeDoc('reminders', { id: newId(), text: t, at: Math.round(at), done: false, deleted: false, createdAt: now });
+      },
+
+      completeReminder(id) {
+        const r = get().reminders[id];
+        if (r && !r.done) writeDoc('reminders', { ...r, done: true, firedAt: Date.now() });
+      },
+
+      snoozeReminder(id, minutes = 10) {
+        const r = get().reminders[id];
+        if (r) writeDoc('reminders', { ...r, done: false, at: Date.now() + minutes * MS_MINUTE });
+      },
+
+      cancelReminder(id) {
+        const r = get().reminders[id];
+        if (r) writeDoc('reminders', { ...r, deleted: true });
+      },
+
+      addMemory(text) {
+        const t = String(text || '').trim().replace(/\.$/, '').slice(0, 300);
+        if (!t) return null;
+        const dup = Object.values(get().memories).find((m) => !m.deleted && m.text.toLowerCase() === t.toLowerCase());
+        if (dup) return dup;
+        return writeDoc('memories', { id: newId(), text: t, deleted: false, createdAt: Date.now() });
+      },
+
+      removeMemory(id) {
+        const m = get().memories[id];
+        if (m) writeDoc('memories', { ...m, deleted: true });
+      },
+
+      /** A line in the shared assistant conversation (visible on every device). */
+      addChat(msg) {
+        return writeDoc('chat', {
+          id: newId(),
+          role: msg.role,
+          text: String(msg.text || '').slice(0, 4000),
+          from: msg.from,
+          status: msg.status || 'done',
+          ...(msg.replyTo ? { replyTo: msg.replyTo } : {}),
+          ...(msg.actions?.length ? { actions: msg.actions.slice(0, 8).map((a) => String(a?.name ?? a)) } : {}),
+          deleted: false,
+          createdAt: Date.now(),
+        });
+      },
+
+      updateChat(id, patch) {
+        const m = get().chat[id];
+        if (m) writeDoc('chat', { ...m, ...patch });
+      },
+
+      clearChat() {
+        for (const m of Object.values(get().chat)) if (!m.deleted) writeDoc('chat', { ...m, deleted: true });
       },
 
       // ---- notifications -------------------------------------------------------
