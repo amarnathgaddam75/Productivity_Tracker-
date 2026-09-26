@@ -12,9 +12,9 @@ export const firebaseConfig = {
 export const emulatorHost = import.meta.env.VITE_FIREBASE_EMULATOR_HOST || '';
 export const mobileUrl = import.meta.env.VITE_MOBILE_URL || '';
 
-// The emulators accept any config, so a demo project is enough for local runs.
+// Emulator runs always use the demo project (matches `npm run emulators`).
 const effectiveConfig =
-  emulatorHost && !isConfigValid(firebaseConfig)
+  emulatorHost
     ? { apiKey: 'demo-key', authDomain: 'demo-lifetracker.firebaseapp.com', projectId: 'demo-lifetracker', appId: 'demo-app' }
     : firebaseConfig;
 

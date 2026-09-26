@@ -13,7 +13,7 @@ export const emulatorHost = process.env.REACT_APP_FIREBASE_EMULATOR_HOST || '';
 export const desktopDownloadUrl = process.env.REACT_APP_DESKTOP_DOWNLOAD_URL || '';
 
 const effectiveConfig =
-  emulatorHost && !isConfigValid(firebaseConfig)
+  emulatorHost
     ? { apiKey: 'demo-key', authDomain: 'demo-lifetracker.firebaseapp.com', projectId: 'demo-lifetracker', appId: 'demo-app' }
     : firebaseConfig;
 

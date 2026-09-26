@@ -31,21 +31,21 @@ The emulators use the real security rules in `firebase/firestore.rules`. Remove 
 2. **Authentication → Get started → Sign-in method → Email/Password → Enable.**
 3. **Firestore Database → Create database** → *production mode* → pick a region.
 4. **Project settings → General → Your apps → Web (`</>`)**, register an app (e.g. "LifeTracker"), and tick *Also set up Firebase Hosting*. Copy the `firebaseConfig` values.
-5. Put the config in both apps:
+5. Put the config in both apps. This repo already ships the config for the `lifetracker-90c0b` project in `packages/desktop/.env` and `packages/mobile/.env`. To use your own project, replace the values there, or override them in a git-ignored `.env.local`:
 
-   `packages/desktop/.env.local`
+   `packages/desktop/.env`
    ```ini
    VITE_FIREBASE_API_KEY=AIza...
    VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
    VITE_FIREBASE_PROJECT_ID=your-project
-   VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+   VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
    VITE_FIREBASE_MESSAGING_SENDER_ID=1234567890
    VITE_FIREBASE_APP_ID=1:1234567890:web:abc123
    VITE_MOBILE_URL=https://your-project.web.app
    ```
-   `packages/mobile/.env.local`: the same values, but with the `REACT_APP_` prefix (see `.env.example`), plus an optional `REACT_APP_DESKTOP_DOWNLOAD_URL`.
+   `packages/mobile/.env`: the same values, but with the `REACT_APP_` prefix, plus `REACT_APP_DESKTOP_DOWNLOAD_URL`.
 
-   > The Firebase web config is not a secret: it only identifies your project. Access is protected by Auth and the Firestore rules. It still belongs in `.env.local` (git-ignored) so each deployment can point at its own project.
+   > The Firebase web config is not a secret: it only identifies your project, and it ships inside every web app that uses Firebase. Access is protected by Auth and the Firestore rules.
 
 6. Set your project id in `.firebaserc` (replace `your-firebase-project-id`), then deploy the rules:
    ```bash
@@ -80,7 +80,7 @@ npm run dist:linux    # → LifeTracker-1.0.0-linux-x86_64.AppImage and -amd64.d
 - Linux: `chmod +x LifeTracker-*.AppImage && ./LifeTracker-*.AppImage`, or `sudo apt install ./LifeTracker-*.deb`.
 
 ### Automated releases (GitHub Actions)
-1. In the GitHub repo, go to **Settings → Secrets and variables → Actions** and add these secrets: `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_APP_ID`. Optionally add the variable `MOBILE_URL`.
+1. Make sure the Firebase config in `packages/desktop/.env` is the project you want the installers to use. No GitHub secrets are needed for unsigned builds.
 2. Tag a version and push it:
    ```bash
    git tag v1.0.0 && git push origin v1.0.0
@@ -95,7 +95,7 @@ The app is then available at `https://your-project.web.app`. On the phone:
 - **Android (Chrome):** open the URL, then use the menu → *Install app*. The in-app account menu also has an **Install app** button.
 - **iOS (Safari 16.4+):** open the URL, then Share → **Add to Home Screen**. Background notifications and the icon badge need the installed web app on iOS.
 
-To deploy automatically on every push to `main`, add a `FIREBASE_SERVICE_ACCOUNT` secret (the JSON key of a service account with the *Firebase Admin* role). `.github/workflows/deploy-mobile.yml` then builds and deploys the PWA and the rules.
+To deploy automatically on every push to `main`, add a `FIREBASE_SERVICE_ACCOUNT` repository secret. Its value is the JSON key of a Google Cloud service account with the **Firebase Admin** and **API Keys Viewer** roles (Google Cloud console → IAM & Admin → Service accounts → Create → add both roles → Keys → Add key → JSON). `.github/workflows/deploy-mobile.yml` then builds and deploys the PWA, the Firestore rules and the indexes. You can also run it manually from the Actions tab.
 
 ## 6. Useful scripts (run from the repo root)
 | Script | What it does |
