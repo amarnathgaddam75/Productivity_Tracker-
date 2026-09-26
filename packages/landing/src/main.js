@@ -70,7 +70,7 @@ document.addEventListener('keydown', (e) => e.key === 'Escape' && setMenu(false)
 
 // ---- download links from the latest GitHub release ---------------------------------
 const PATTERNS = {
-  win: [/-win-x64\.exe$/i, /\.exe$/i],
+  win: [/-setup\.exe$/i, /-win-x64\.exe$/i, /\.exe$/i],
   mac: [navigator.userAgent.includes('Mac') && /arm|aarch/i.test(navigator.userAgent) ? /arm64\.dmg$/i : /x64\.dmg$/i, /\.dmg$/i],
   linux: [/\.AppImage$/i, /\.deb$/i],
 };

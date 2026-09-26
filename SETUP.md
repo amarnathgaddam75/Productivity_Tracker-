@@ -66,7 +66,7 @@ Sign up in either app, then log in with the same account in the other. Changes s
 ## 4. Build the desktop installers
 
 ```bash
-npm run dist:win      # → packages/desktop/release/LifeTracker-1.0.0-win-x64.exe (installer) + portable .exe
+npm run dist:win      # → packages/desktop/release/LifeTracker-1.0.0-win-x64-setup.exe (installer) + -portable.exe
 npm run dist:mac      # → LifeTracker-1.0.0-mac-x64.dmg and -arm64.dmg
 npm run dist:linux    # → LifeTracker-1.0.0-linux-x86_64.AppImage and -amd64.deb
 ```
