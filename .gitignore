@@ -1,6 +1,6 @@
 node_modules/
 dist/
-build/
+packages/mobile/build/
 release/
 coverage/
 .env.local

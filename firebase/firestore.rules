@@ -1,0 +1,103 @@
+rules_version = '2';
+
+// LifeTracker security rules.
+//
+// Data model (all user data is nested under the user's own document):
+//   users/{uid}                      profile   { email, displayName, createdAt }
+//   users/{uid}/tasks/{taskId}       task      (see validTask)
+//   users/{uid}/summaries/{date}     daily report snapshot, id = "YYYY-MM-DD"
+//   users/{uid}/meta/settings        user preferences
+//
+// Every document is readable/writable only by its owner. Writes carry an
+// `updatedAt` timestamp and the rules enforce last-write-wins: an update may
+// never replace a newer version of a document with an older one.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function data() {
+      return request.resource.data;
+    }
+
+    function isTimestamp(v) {
+      return v is int && v >= 0;
+    }
+
+    function optTimestamp(v) {
+      return v == null || isTimestamp(v);
+    }
+
+    // Last-write-wins guard for updates.
+    function notOlder() {
+      return resource == null || data().updatedAt >= resource.data.updatedAt;
+    }
+
+    function validTask(taskId) {
+      let d = data();
+      return d.keys().hasAll(['id', 'title', 'estimatedHours', 'completed', 'date', 'sessions', 'createdAt', 'updatedAt', 'deleted'])
+        && d.keys().hasOnly(['id', 'title', 'estimatedHours', 'completed', 'completedAt', 'date', 'sessions', 'baseMs',
+                             'runningSince', 'createdAt', 'updatedAt', 'deleted', 'deviceId', 'carriedFrom'])
+        && d.id == taskId
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 200
+        && d.estimatedHours is number && d.estimatedHours >= 0 && d.estimatedHours <= 24
+        && d.completed is bool
+        && d.deleted is bool
+        && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.sessions is list && d.sessions.size() <= 250
+        && (!('baseMs' in d) || (d.baseMs is number && d.baseMs >= 0))
+        && (!('completedAt' in d) || optTimestamp(d.completedAt))
+        && (!('runningSince' in d) || optTimestamp(d.runningSince))
+        && isTimestamp(d.createdAt)
+        && isTimestamp(d.updatedAt);
+    }
+
+    function validSummary(day) {
+      let d = data();
+      return d.keys().hasOnly(['date', 'totalTasks', 'completedTasks', 'hoursWorked', 'estimatedHours',
+                               'productivityScore', 'efficiency', 'goalHours', 'goalReached', 'updatedAt'])
+        && d.date == day
+        && d.totalTasks is int && d.completedTasks is int
+        && d.hoursWorked is number && d.hoursWorked >= 0 && d.hoursWorked <= 24
+        && isTimestamp(d.updatedAt);
+    }
+
+    function validSettings() {
+      let d = data();
+      return d.keys().hasOnly(['displayName', 'dailyGoalHours', 'summaryHour', 'carryOver', 'autoStartNext',
+                               'systemNotifications', 'updatedAt'])
+        && (!('displayName' in d) || (d.displayName is string && d.displayName.size() <= 60))
+        && (!('dailyGoalHours' in d) || (d.dailyGoalHours is number && d.dailyGoalHours > 0 && d.dailyGoalHours <= 24))
+        && (!('summaryHour' in d) || (d.summaryHour is int && d.summaryHour >= 0 && d.summaryHour <= 23))
+        && isTimestamp(d.updatedAt);
+    }
+
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && data().keys().hasOnly(['email', 'displayName', 'createdAt']);
+
+      match /tasks/{taskId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validTask(taskId) && notOlder();
+      }
+
+      match /summaries/{day} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validSummary(day) && notOlder();
+      }
+
+      match /meta/{docId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && docId == 'settings' && validSettings() && notOlder();
+      }
+    }
+
+    // Deny everything else.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

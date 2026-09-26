@@ -1,0 +1,83 @@
+{
+  "name": "@lifetracker/desktop",
+  "productName": "LifeTracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LifeTracker desktop app — tasks, timers and daily productivity reports",
+  "author": "LifeTracker",
+  "homepage": "https://github.com/amarnathgaddam75/Productivity_Tracker-",
+  "main": "electron/main.cjs",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n vite,electron -c magenta,cyan \"vite --port 5173 --strictPort\" \"wait-on tcp:127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
+    "dev:web": "vite --port 5173",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "electron .",
+    "dist": "vite build && electron-builder",
+    "dist:win": "vite build && electron-builder --win",
+    "dist:mac": "vite build && electron-builder --mac",
+    "dist:linux": "vite build && electron-builder --linux"
+  },
+  "dependencies": {
+    "@lifetracker/shared": "1.0.0",
+    "lucide-react": "^1.48.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.0",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^10.0.0",
+    "cross-env": "^10.0.0",
+    "electron": "^44.0.0",
+    "electron-builder": "^26.0.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "vite": "^8.0.0",
+    "wait-on": "^9.0.0"
+  },
+  "build": {
+    "appId": "com.lifetracker.desktop",
+    "productName": "LifeTracker",
+    "copyright": "Copyright © 2026 LifeTracker",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "electron/main.cjs"
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "mac": {
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] }
+      ],
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Office",
+      "maintainer": "LifeTracker <support@lifetracker.app>",
+      "icon": "build/icon.png"
+    },
+    "publish": null
+  }
+}
