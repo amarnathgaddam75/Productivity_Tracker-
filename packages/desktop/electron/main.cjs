@@ -22,6 +22,10 @@ const CSP = [
   "connect-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com",
 ].join('; ');
 
+// Many Linux GPU drivers are blocklisted by Chromium, which disables WebGL and
+// with it the particle scene. Allow the SwiftShader software fallback instead.
+app.commandLine.appendSwitch('enable-unsafe-swiftshader');
+
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } },
 ]);

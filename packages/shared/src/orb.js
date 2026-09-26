@@ -209,9 +209,19 @@ export function supportsWebGL() {
 export function createOrb(canvas, opts = {}) {
   const reduceMotion =
     typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const count = opts.count ?? 60000;
   const gl = canvas.getContext('webgl', { antialias: false, alpha: true, premultipliedAlpha: true, powerPreference: 'high-performance' });
   if (!gl) return null;
+  // Software renderers (SwiftShader / llvmpipe, used when the GPU is blocklisted)
+  // can't push 100k points smoothly; draw fewer so the UI stays responsive.
+  let renderer = '';
+  try {
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    renderer = String(gl.getParameter(dbg ? dbg.UNMASKED_RENDERER_WEBGL : gl.RENDERER));
+  } catch {
+    /* ignore */
+  }
+  const software = /swiftshader|llvmpipe|softpipe|software/i.test(renderer);
+  const count = Math.min(opts.count ?? 60000, software ? 25000 : Infinity);
 
   const prog = gl.createProgram();
   gl.attachShader(prog, compile(gl, gl.VERTEX_SHADER, VERT));
@@ -342,6 +352,8 @@ export function createOrb(canvas, opts = {}) {
 
   return {
     count,
+    renderer,
+    software,
     /** Ease toward a new look. */
     set({ shape, weights, color, energy, brightness, offset, scale, immediate } = {}) {
       if (shape) tgt.weights = ORB_SHAPES.map((s) => (s === shape ? 1 : 0));

@@ -49,12 +49,27 @@ export default function Shell() {
   const signOut = useStore((s) => s.signOut);
   const index = NAV.findIndex((n) => n.id === view);
   const mainRef = useRef(null);
-  useEffect(() => mainRef.current?.scrollTo(0, 0), [view]);
+  // Block body on purpose: in newer Chromium (Electron 44) scrollTo() returns a
+  // Promise, and React would call a returned non-function as the cleanup and crash.
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0);
+  }, [view]);
   const nav = NAV[index];
 
-  useEffect(() => window.desktop?.onNavigate?.(setView), []);
   useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && setMenu(false);
+    const off = window.desktop?.onNavigate?.(setView);
+    return typeof off === 'function' ? off : undefined;
+  }, []);
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') setMenu(false);
+      // Ctrl/Cmd + 1..3 switch views (works in the browser build too)
+      if ((e.ctrlKey || e.metaKey) && /^[1-9]$/.test(e.key) && NAV[Number(e.key) - 1]) {
+        e.preventDefault();
+        setView(NAV[Number(e.key) - 1].id);
+        setMenu(false);
+      }
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
@@ -75,7 +90,7 @@ export default function Shell() {
             LT
           </button>
           <div>
-            <div className="caps leading-9 text-slate-300">
+            <div className="caps max-w-[260px] truncate leading-9 text-slate-300" title={displayName}>
               LifeTracker / <span className="text-slate-500">{displayName}</span>
             </div>
             <div className="caps -mt-1.5 text-slate-600">
@@ -83,6 +98,14 @@ export default function Shell() {
             </div>
           </div>
         </div>
+        <nav className="absolute left-1/2 top-2 flex -translate-x-1/2 items-center gap-7" aria-label="Views (Ctrl+1/2/3)">
+          {NAV.map((n, i) => (
+            <button key={n.id} onClick={() => go(n.id)} className={`caps transition ${view === n.id ? 'text-slate-50' : 'text-slate-500 hover:text-slate-200'}`}>
+              <span className={view === n.id ? 'text-[var(--accent)]' : 'text-slate-600'}>{`//0${i + 1}`}</span> {n.label}
+              <span className={`mx-auto mt-1.5 block h-px transition-all duration-500 ${view === n.id ? 'w-full bg-[var(--accent)]' : 'w-0'}`} />
+            </button>
+          ))}
+        </nav>
         <div className="flex items-center gap-4">
           <SyncBadge />
           <NotificationBell />
