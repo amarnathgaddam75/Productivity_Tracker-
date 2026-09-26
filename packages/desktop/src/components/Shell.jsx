@@ -9,8 +9,12 @@ import SyncBadge from './SyncBadge.jsx';
 import NotificationBell from './NotificationBell.jsx';
 import Toasts from './Toasts.jsx';
 import Scene from './Scene.jsx';
+import AssistantView from './AssistantView.jsx';
+import CommandBar from './CommandBar.jsx';
+import { useAssistantRuntime } from '../assistant/runtime.js';
 
 const NAV = [
+  { id: 'assistant', label: 'Assistant', kicker: 'Briefing / Live' },
   { id: 'tasks', label: 'Tasks', kicker: 'Plan / Track' },
   { id: 'reports', label: 'Reports', kicker: 'Progress / Insight' },
   { id: 'settings', label: 'Settings', kicker: 'Profile / Sync' },
@@ -41,7 +45,9 @@ function Rail() {
 }
 
 export default function Shell() {
-  const [view, setView] = useState('tasks');
+  const [view, setView] = useState('assistant');
+  useAssistantRuntime();
+  const assistantName = useStore((s) => s.settings.assistantName) || 'Atlas';
   const [menu, setMenu] = useState(false);
   const user = useStore((s) => s.user);
   const displayName = useStore((s) => s.settings.displayName) || user?.displayName || user?.email;
@@ -49,12 +55,27 @@ export default function Shell() {
   const signOut = useStore((s) => s.signOut);
   const index = NAV.findIndex((n) => n.id === view);
   const mainRef = useRef(null);
-  useEffect(() => mainRef.current?.scrollTo(0, 0), [view]);
+  // Block body on purpose: in newer Chromium (Electron 44) scrollTo() returns a
+  // Promise, and React would call a returned non-function as the cleanup and crash.
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0);
+  }, [view]);
   const nav = NAV[index];
 
-  useEffect(() => window.desktop?.onNavigate?.(setView), []);
   useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && setMenu(false);
+    const off = window.desktop?.onNavigate?.(setView);
+    return typeof off === 'function' ? off : undefined;
+  }, []);
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') setMenu(false);
+      // Ctrl/Cmd + 1..3 switch views (works in the browser build too)
+      if ((e.ctrlKey || e.metaKey) && /^[1-9]$/.test(e.key) && NAV[Number(e.key) - 1]) {
+        e.preventDefault();
+        setView(NAV[Number(e.key) - 1].id);
+        setMenu(false);
+      }
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
@@ -71,11 +92,11 @@ export default function Shell() {
       {/* top chrome */}
       <header className="fixed inset-x-10 top-7 z-30 flex items-start justify-between">
         <div className="flex items-start gap-3.5">
-          <button onClick={() => go('tasks')} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-[9px] tracking-[0.08em] hover:border-white/60" aria-label="LifeTracker home">
+          <button onClick={() => go('assistant')} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-[9px] tracking-[0.08em] hover:border-white/60" aria-label="LifeTracker home">
             LT
           </button>
           <div>
-            <div className="caps leading-9 text-slate-300">
+            <div className="caps max-w-[260px] truncate leading-9 text-slate-300" title={displayName}>
               LifeTracker / <span className="text-slate-500">{displayName}</span>
             </div>
             <div className="caps -mt-1.5 text-slate-600">
@@ -83,6 +104,14 @@ export default function Shell() {
             </div>
           </div>
         </div>
+        <nav className="absolute left-1/2 top-2 flex -translate-x-1/2 items-center gap-6" aria-label="Views (Ctrl+1..4)">
+          {NAV.map((n, i) => (
+            <button key={n.id} onClick={() => go(n.id)} className={`caps transition ${view === n.id ? 'text-slate-50' : 'text-slate-500 hover:text-slate-200'}`}>
+              <span className={view === n.id ? 'text-[var(--accent)]' : 'text-slate-600'}>{`//0${i + 1}`}</span> {n.label}
+              <span className={`mx-auto mt-1.5 block h-px transition-all duration-500 ${view === n.id ? 'w-full bg-[var(--accent)]' : 'w-0'}`} />
+            </button>
+          ))}
+        </nav>
         <div className="flex items-center gap-4">
           <SyncBadge />
           <NotificationBell />
@@ -123,9 +152,10 @@ export default function Shell() {
             {nav.kicker}
           </p>
           <h1 className="font-display mb-10 mt-3 text-[92px] leading-[0.88]" style={{ textShadow: '0 0 28px rgba(7,5,13,.8)' }}>
-            {nav.label}
+            {view === 'assistant' ? assistantName : nav.label}
           </h1>
           <div key={view} className="animate-slide-in">
+            {view === 'assistant' && <AssistantView />}
             {view === 'tasks' && <TasksView />}
             {view === 'reports' && <ReportsView />}
             {view === 'settings' && <SettingsView />}
@@ -156,6 +186,7 @@ export default function Shell() {
           </div>
         </div>
       )}
+      <CommandBar />
       <Toasts />
     </div>
   );

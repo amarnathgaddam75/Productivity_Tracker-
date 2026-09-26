@@ -1,4 +1,5 @@
-import { initFirebase, isConfigValid, createTrackerStore } from '@lifetracker/shared';
+import { initFirebase, isConfigValid, createTrackerStore, playSound } from '@lifetracker/shared';
+import { pushToPhones } from './assistant/phone.js';
 
 export const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -26,7 +27,10 @@ if (configured) initFirebase(effectiveConfig, { emulatorHost });
 const bridge = typeof window !== 'undefined' ? window.desktop : undefined;
 export const isElectron = Boolean(bridge?.isDesktop);
 
-function deliver({ title, body }) {
+function deliver({ title, body, kind }) {
+  // Completed / time warning / goal / daily summary also go to the phone.
+  if (['completed', 'warning', 'overtime', 'goal', 'summary'].includes(kind)) pushToPhones({ kind, title, body, tag: kind });
+  if (kind === 'goal' && useStore.getState().settings.sounds) playSound('goal');
   if (bridge) {
     bridge.notify(title, body);
     return;

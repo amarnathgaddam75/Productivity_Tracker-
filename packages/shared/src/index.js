@@ -11,3 +11,7 @@ export * from './store.js';
 export * from './hooks.js';
 export * from './orb.js';
 export * from './scene.js';
+export * from './assistant.js';
+export * from './sounds.js';
+export * from './voice.js';
+export * from './push.js';

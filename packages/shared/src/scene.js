@@ -39,8 +39,14 @@ export function timerAccent({ over, warn }) {
  * @param {'tasks'|'reports'|'settings'|'alerts'|'auth'} view
  * @param {ReturnType<typeof activeTimer>} info
  */
-export function sceneOrbState(view, info) {
+export function sceneOrbState(view, info, extra = {}) {
   switch (view) {
+    case 'assistant': {
+      const color = { ahead: '#6ee7b7', done: '#6ee7b7', behind: '#fbbf24', idle: '#a78bfa' }[extra.status] || '#a78bfa';
+      return extra.speaking
+        ? { shape: 'sphere', color, energy: 1.2, brightness: 1.3 }
+        : { shape: 'sphere', color, energy: 0.55, brightness: 1 };
+    }
     case 'reports':
       return { shape: 'galaxy', color: '#fbbf24', energy: 0.4, brightness: 0.9 };
     case 'settings':

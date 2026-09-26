@@ -30,6 +30,20 @@ export const DEFAULT_SETTINGS = {
   carryOver: true,
   autoStartNext: false,
   systemNotifications: true,
+  // assistant
+  assistantName: 'Atlas',
+  workStartHour: 9,
+  workEndHour: 18,
+  checkinMinutes: 60,
+  nudgeUntrackedMinutes: 15,
+  idlePauseMinutes: 10,
+  distractions: 'youtube, netflix, reddit, instagram, facebook, twitter, x.com, tiktok, twitch, prime video, hotstar, 9gag',
+  voice: true,
+  sounds: true,
+  pushToPhone: true,
+  shareTitles: false,
+  runInBackground: true,
+  startAtLogin: false,
   updatedAt: 0,
 };
 
@@ -147,6 +161,15 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
       saveCache('summaries', summaries);
     };
 
+    const applyDeviceChanges = (changes) => {
+      const devices = { ...get().devices };
+      for (const c of changes) {
+        if (c.type === 'removed' || c.data?.deleted) delete devices[c.id];
+        else devices[c.id] = { ...c.data, id: c.id };
+      }
+      set({ devices });
+    };
+
     // ---- daily rollover ------------------------------------------------------
     const rollover = (today, now) => {
       if (get().settings.carryOver) {
@@ -174,6 +197,10 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
       tasks: {},
       settings: { ...DEFAULT_SETTINGS },
       summaries: {},
+      devices: {},
+      pushKeys: null,
+      pushKeysLoaded: false,
+      presence: null,
       notifications: [],
       toasts: [],
       sync: { status: 'synced', pending: 0 },
@@ -230,6 +257,9 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
             subscribeCollection(user.uid, 'tasks', applyTaskChanges, onErr),
             subscribeDoc(user.uid, 'meta/settings', applySettings, onErr),
             subscribeCollection(user.uid, 'summaries', applySummaryChanges, onErr, { max: 30 }),
+            subscribeCollection(user.uid, 'devices', applyDeviceChanges, onErr),
+            subscribeDoc(user.uid, 'meta/push', (d) => set({ pushKeys: d, pushKeysLoaded: true }), onErr),
+            subscribeDoc(user.uid, 'meta/presence', (d) => set({ presence: d }), onErr),
           ];
         }
         rollover(today, Date.now());
@@ -246,6 +276,10 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
           user: null,
           tasks: {},
           summaries: {},
+          devices: {},
+          pushKeys: null,
+          pushKeysLoaded: false,
+          presence: null,
           notifications: [],
           toasts: [],
           settings: { ...DEFAULT_SETTINGS },
@@ -344,6 +378,14 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
         writeTask(timer.pause(t, now), now);
       },
 
+      /** Pause at a past moment (e.g. when you walked away from the computer). */
+      pauseTimerAt(id, at) {
+        const t = get().tasks[id];
+        if (!t || !timer.isRunning(t)) return;
+        const when = Math.min(Date.now(), Math.max(t.runningSince, at));
+        writeTask(timer.pause(t, when));
+      },
+
       toggleTimer(id) {
         const t = get().tasks[id];
         if (!t) return;
@@ -363,6 +405,41 @@ export function createTrackerStore({ deliver, onBadge } = {}) {
         set({ settings });
         saveCache('settings', settings);
         queue?.enqueue('meta/settings', settings);
+      },
+
+      // ---- phone push + presence -------------------------------------------------
+      /** Store the web-push key pair shared by this user's desktops (owner-only doc). */
+      savePushKeys(keys) {
+        const doc = { ...keys, updatedAt: Date.now() };
+        set({ pushKeys: doc });
+        queue?.enqueue('meta/push', doc);
+      },
+
+      /** Register this phone's push subscription. */
+      saveDevice(id, sub) {
+        const now = Date.now();
+        const doc = clean({ id, ...sub, deleted: false, createdAt: get().devices[id]?.createdAt || now, updatedAt: now });
+        set((s) => ({ devices: { ...s.devices, [id]: doc } }));
+        queue?.enqueue(`devices/${id}`, doc);
+      },
+
+      removeDevice(id) {
+        const d = get().devices[id];
+        if (!d) return;
+        const doc = { ...d, deleted: true, updatedAt: Date.now() };
+        set((s) => {
+          const devices = { ...s.devices };
+          delete devices[id];
+          return { devices };
+        });
+        queue?.enqueue(`devices/${id}`, doc);
+      },
+
+      /** What the desktop is doing right now (shown on the phone). */
+      setPresence(p) {
+        const doc = clean({ ...p, updatedAt: Date.now() });
+        set({ presence: doc });
+        queue?.enqueue('meta/presence', doc);
       },
 
       // ---- notifications -------------------------------------------------------

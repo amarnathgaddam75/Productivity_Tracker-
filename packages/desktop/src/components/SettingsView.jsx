@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, Smartphone, Save, Download } from 'lucide-react';
 import { useStore, mobileUrl, isElectron } from '../config.js';
+import AssistantSettings from './AssistantSettings.jsx';
 
 function Toggle({ checked, onChange, label, description }) {
   return (
@@ -75,6 +76,8 @@ export default function SettingsView() {
           {saved && <span className="text-sm text-emerald-600 dark:text-emerald-400">Saved ✓</span>}
         </div>
       </form>
+
+      <AssistantSettings />
 
       <div className="card divide-y divide-slate-100 px-6 py-3 dark:divide-slate-800">
         <Toggle

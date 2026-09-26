@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LogOut, Download, Monitor, CloudOff, RefreshCw, AlertTriangle } from 'lucide-react';
 import { useStore, desktopDownloadUrl } from '../config';
+import Presence from './Presence';
 
 function SyncDot() {
   const sync = useStore((s) => s.sync);
@@ -61,6 +62,7 @@ export default function Header() {
         <div className="min-w-0">
           <div className="caps text-slate-500"><span className="mr-2 text-[var(--accent)]">{'//LT'}</span>{greeting}</div>
           <div className="font-display mt-1 truncate text-2xl leading-none">{name.split('@')[0]}</div>
+          <Presence />
         </div>
         <div className="flex items-center gap-3" ref={ref}>
           <SyncDot />

@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
-import { BellOff, BellRing } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { BellOff, BellRing, Smartphone, Loader2 } from 'lucide-react';
+import { enablePhonePush, disablePhonePush, pushSupport, thisDeviceRegistered } from '../phonePush';
 import { useStore } from '../config';
 import { KIND_STYLE } from './kindStyle';
 
@@ -15,7 +16,29 @@ export default function AlertsTab() {
   const notifications = useStore((s) => s.notifications);
   const markAllRead = useStore((s) => s.markAllRead);
   const clear = useStore((s) => s.clearNotifications);
-  const canAsk = typeof Notification !== 'undefined' && Notification.permission === 'default';
+  const devices = useStore((s) => s.devices);
+  const registered = thisDeviceRegistered(devices);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const support = pushSupport();
+
+  async function toggle() {
+    setBusy(true);
+    setMsg('');
+    try {
+      if (registered) {
+        await disablePhonePush(useStore);
+        setMsg('This phone will no longer get notifications.');
+      } else {
+        await enablePhonePush(useStore);
+        setMsg('Done — your desktop assistant can now reach this phone, even when the app is closed.');
+      }
+    } catch (err) {
+      setMsg(err.message || String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
 
   // Opening the tab marks everything as read (clears the badge).
   useEffect(() => {
@@ -33,11 +56,22 @@ export default function AlertsTab() {
         <h2 className="caps text-slate-300"><span className="mr-2 text-brand-300">{'//01'}</span>Notifications</h2>
         {notifications.length > 0 && <button onClick={clear} className="caps text-brand-300">Clear all</button>}
       </div>
-      {canAsk && (
-        <button className="btn-soft w-full" onClick={() => Notification.requestPermission()}>
-          <BellRing className="h-4 w-4" /> Allow alerts when the app is in background
+      <div className="card p-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 text-[var(--accent)]">
+            <Smartphone className="h-5 w-5" strokeWidth={1.5} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm text-slate-100">{registered ? 'Notifications on this phone are on' : 'Get reminders on this phone'}</div>
+            <div className="text-xs text-slate-500">Briefings, nudges and reports from your desktop assistant — even when this app is closed.</div>
+          </div>
+        </div>
+        <button className={`${registered ? 'btn-soft' : 'btn-primary'} mt-4 w-full`} onClick={toggle} disabled={busy || !support.ok}>
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <BellRing className="h-4 w-4" />}
+          {registered ? 'Turn off on this phone' : 'Enable notifications'}
         </button>
-      )}
+        {(msg || !support.ok) && <p className="mt-3 text-xs text-slate-400">{msg || support.reason}</p>}
+      </div>
       {notifications.length === 0 ? (
         <div className="card flex flex-col items-center p-10 text-center text-sm text-slate-500">
           <BellOff className="mb-3 h-6 w-6 text-slate-500" strokeWidth={1.5} />

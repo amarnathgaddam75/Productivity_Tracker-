@@ -34,7 +34,8 @@
     "react-dom": "^18.3.1",
     "tailwindcss": "^3.4.17",
     "vite": "^8.0.0",
-    "wait-on": "^9.0.0"
+    "wait-on": "^9.0.0",
+    "zustand": "^5.0.15"
   },
   "build": {
     "appId": "com.lifetracker.desktop",
@@ -107,5 +108,8 @@
     "portable": {
       "artifactName": "LifeTracker-${version}-win-x64-portable.${ext}"
     }
+  },
+  "dependencies": {
+    "web-push": "^3.6.7"
   }
 }

@@ -1,14 +1,23 @@
 // Minimal, safe bridge between the renderer and the main process.
 const { contextBridge, ipcRenderer } = require('electron');
 
+function on(channel, cb) {
+  const handler = (_e, payload) => cb(payload);
+  ipcRenderer.on(channel, handler);
+  return () => ipcRenderer.removeListener(channel, handler);
+}
+
 contextBridge.exposeInMainWorld('desktop', {
   isDesktop: true,
   platform: process.platform,
   notify: (title, body) => ipcRenderer.send('notify', { title, body }),
   setBadge: (count) => ipcRenderer.send('badge', count),
-  onNavigate: (cb) => {
-    const handler = (_e, view) => cb(view);
-    ipcRenderer.on('navigate', handler);
-    return () => ipcRenderer.removeListener('navigate', handler);
-  },
+  onNavigate: (cb) => on('navigate', cb),
+  // assistant
+  sampleActivity: () => ipcRenderer.invoke('activity:sample'),
+  sendPush: (subscriptions, payload, vapid) => ipcRenderer.invoke('push:send', { subscriptions, payload, vapid }),
+  updateTray: (state) => ipcRenderer.send('tray:update', state),
+  setPrefs: (prefs) => ipcRenderer.send('app:prefs', prefs),
+  onCommandBar: (cb) => on('command-bar', cb),
+  onAssistantCommand: (cb) => on('assistant-command', cb),
 });

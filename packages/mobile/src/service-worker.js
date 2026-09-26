@@ -31,14 +31,36 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
-// Focus the app when a notification is tapped.
+// Notifications pushed by the desktop assistant (Web Push). They arrive even
+// when the app is closed.
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: 'LifeTracker', body: event.data ? event.data.text() : '' };
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'LifeTracker', {
+      body: data.body || '',
+      tag: data.tag || 'lifetracker',
+      renotify: true,
+      icon: process.env.PUBLIC_URL + '/icon-192.png',
+      badge: process.env.PUBLIC_URL + '/favicon.png',
+      data: { url: data.url || process.env.PUBLIC_URL + '/' },
+    }),
+  );
+});
+
+// Focus (or open) the app when a notification is tapped.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || process.env.PUBLIC_URL + '/';
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       const client = clients.find((c) => 'focus' in c);
       if (client) return client.focus();
-      return self.clients.openWindow(process.env.PUBLIC_URL + '/');
+      return self.clients.openWindow(url);
     }),
   );
 });
