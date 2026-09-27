@@ -10,6 +10,9 @@ rules_version = '2';
 //   users/{uid}/meta/push            Web Push key pair used by the user's desktops
 //   users/{uid}/meta/presence        what the desktop is doing now (shown on the phone)
 //   users/{uid}/devices/{deviceId}   phones subscribed to push notifications
+//   users/{uid}/reminders/{id}       assistant reminders           { text, at, done, ... }
+//   users/{uid}/memories/{id}        facts the assistant remembers { text, ... }
+//   users/{uid}/chat/{id}            the assistant conversation shared by all devices
 //
 // Every document is readable/writable only by its owner. Writes carry an
 // `updatedAt` timestamp and the rules enforce last-write-wins: an update may
@@ -81,7 +84,8 @@ service cloud.firestore {
                                'systemNotifications', 'assistantName', 'workStartHour', 'workEndHour',
                                'checkinMinutes', 'nudgeUntrackedMinutes', 'idlePauseMinutes', 'distractions',
                                'voice', 'sounds', 'pushToPhone', 'shareTitles', 'runInBackground', 'startAtLogin',
-                               'updatedAt'])
+                               'city', 'updatedAt'])
+        && (!('city' in d) || (d.city is string && d.city.size() <= 80))
         && (!('assistantName' in d) || (d.assistantName is string && d.assistantName.size() <= 30))
         && (!('distractions' in d) || (d.distractions is string && d.distractions.size() <= 1000))
         && optInt(d, 'workStartHour', 0, 23) && optInt(d, 'workEndHour', 1, 24)
@@ -106,7 +110,8 @@ service cloud.firestore {
 
     function validPresence() {
       let d = data();
-      return d.keys().hasOnly(['app', 'title', 'idle', 'idleSec', 'taskId', 'taskTitle', 'platform', 'supported', 'updatedAt'])
+      return d.keys().hasOnly(['app', 'title', 'idle', 'idleSec', 'taskId', 'taskTitle', 'platform', 'supported', 'answers', 'brain', 'updatedAt'])
+        && (!('brain' in d) || (d.brain is string && d.brain.size() <= 80))
         && (!('app' in d) || d.app == null || (d.app is string && d.app.size() <= 100))
         && (!('title' in d) || d.title == null || (d.title is string && d.title.size() <= 200))
         && isTimestamp(d.updatedAt);
@@ -120,6 +125,39 @@ service cloud.firestore {
         && d.keys is map && d.keys.keys().hasOnly(['p256dh', 'auth'])
         && d.deleted is bool
         && isTimestamp(d.updatedAt);
+    }
+
+    function validReminder(id) {
+      let d = data();
+      return d.keys().hasOnly(['id', 'text', 'at', 'done', 'firedAt', 'deleted', 'createdAt', 'updatedAt'])
+        && d.id == id
+        && d.text is string && d.text.size() > 0 && d.text.size() <= 200
+        && isTimestamp(d.at) && d.done is bool && d.deleted is bool
+        && (!('firedAt' in d) || optTimestamp(d.firedAt))
+        && isTimestamp(d.createdAt) && isTimestamp(d.updatedAt);
+    }
+
+    function validMemory(id) {
+      let d = data();
+      return d.keys().hasOnly(['id', 'text', 'deleted', 'createdAt', 'updatedAt'])
+        && d.id == id
+        && d.text is string && d.text.size() > 0 && d.text.size() <= 300
+        && d.deleted is bool
+        && isTimestamp(d.createdAt) && isTimestamp(d.updatedAt);
+    }
+
+    function validChat(id) {
+      let d = data();
+      return d.keys().hasOnly(['id', 'role', 'text', 'from', 'status', 'replyTo', 'actions', 'deleted', 'createdAt', 'updatedAt'])
+        && d.id == id
+        && d.role in ['user', 'assistant']
+        && d.text is string && d.text.size() <= 4000
+        && d.from in ['desktop', 'phone']
+        && d.status in ['pending', 'working', 'done', 'error']
+        && (!('replyTo' in d) || (d.replyTo is string && d.replyTo.size() <= 40))
+        && (!('actions' in d) || (d.actions is list && d.actions.size() <= 8))
+        && d.deleted is bool
+        && isTimestamp(d.createdAt) && isTimestamp(d.updatedAt);
     }
 
     match /users/{uid} {
@@ -149,6 +187,21 @@ service cloud.firestore {
       match /devices/{deviceId} {
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && validDevice(deviceId) && notOlder();
+      }
+
+      match /reminders/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validReminder(id) && notOlder();
+      }
+
+      match /memories/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validMemory(id) && notOlder();
+      }
+
+      match /chat/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validChat(id) && notOlder();
       }
     }
 

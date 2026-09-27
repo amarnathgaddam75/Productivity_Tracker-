@@ -3,7 +3,7 @@
   "productName": "LifeTracker",
   "version": "1.1.0",
   "private": true,
-  "description": "LifeTracker desktop app — tasks, timers and daily productivity reports",
+  "description": "LifeTracker desktop app \u2014 tasks, timers and daily productivity reports",
   "author": "LifeTracker",
   "homepage": "https://github.com/amarnathgaddam75/Productivity_Tracker-",
   "main": "electron/main.cjs",
@@ -40,7 +40,7 @@
   "build": {
     "appId": "com.lifetracker.desktop",
     "productName": "LifeTracker",
-    "copyright": "Copyright © 2026 LifeTracker",
+    "copyright": "Copyright \u00a9 2026 LifeTracker",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -89,7 +89,10 @@
         }
       ],
       "category": "public.app-category.productivity",
-      "icon": "build/icon.png"
+      "icon": "build/icon.png",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "LifeTracker listens when you talk to your assistant."
+      }
     },
     "linux": {
       "target": [

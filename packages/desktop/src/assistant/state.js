@@ -1,45 +1,35 @@
-// Local (per-device) assistant state: conversation log, latest activity sample
+// Local (per-device) assistant state: brain settings, voice/thinking mode, latest activity sample
 // and today's activity timeline. Activity never leaves this computer except
 // for the short "now doing" presence line the phone shows.
 
 import { create } from 'zustand';
-import { storage, dateKey } from '@lifetracker/shared';
+import { storage, dateKey, DEFAULT_BRAIN } from '@lifetracker/shared';
 
-const MAX_MESSAGES = 60;
 const MAX_SEGMENTS = 3000;
 const JOIN_GAP_MS = 20000;
 export const AWAY = 'Away';
 
 const segKey = (uid, day) => `lt:activity:${uid}:${day}`;
-const msgKey = (uid) => `lt:assistant-log:${uid}`;
 
 let seq = 0;
 
 export const useAssistant = create((set, get) => ({
   uid: null,
   day: dateKey(),
-  messages: [],
   activity: null,
   segments: [],
   commandOpen: false,
   speaking: false,
+  mode: 'idle', // 'idle' | 'listening' | 'thinking' | 'speaking'
+  level: 0, // microphone level while listening
+  brain: { ...DEFAULT_BRAIN, ...(storage.get('lt:brain', {}) || {}) },
+  keys: {}, // providers with a saved API key
+  weather: null,
+  profile: null,
 
   load(uid) {
     const day = dateKey();
-    set({ uid, day, messages: storage.get(msgKey(uid), []) || [], segments: storage.get(segKey(uid, day), []) || [] });
-  },
-
-  addMessage(m) {
-    const item = { id: `${Date.now()}-${++seq}`, at: Date.now(), ...m };
-    const messages = [...get().messages, item].slice(-MAX_MESSAGES);
-    set({ messages });
-    if (get().uid) storage.set(msgKey(get().uid), messages);
-    return item;
-  },
-
-  clearMessages() {
-    set({ messages: [] });
-    if (get().uid) storage.set(msgKey(get().uid), []);
+    set({ uid, day, segments: storage.get(segKey(uid, day), []) || [] });
   },
 
   /** Record one activity sample into today's timeline. */
@@ -75,7 +65,34 @@ export const useAssistant = create((set, get) => ({
   },
 
   setSpeaking(speaking) {
-    set({ speaking });
+    set({ speaking, mode: speaking ? 'speaking' : get().mode === 'speaking' ? 'idle' : get().mode });
+  },
+
+  setMode(mode) {
+    set({ mode, ...(mode !== 'listening' ? { level: 0 } : {}) });
+  },
+
+  setLevel(level) {
+    set({ level });
+  },
+
+  /** Brain settings are per laptop (the API key itself lives in the main process). */
+  setBrain(patch) {
+    const brain = { ...get().brain, ...patch };
+    storage.set('lt:brain', brain);
+    set({ brain });
+  },
+
+  setKeys(keys) {
+    set({ keys: keys || {} });
+  },
+
+  setWeather(weather) {
+    set({ weather });
+  },
+
+  setProfile(profile) {
+    set({ profile });
   },
 }));
 

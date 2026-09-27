@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { activeTimer, sceneOrbState, useNow } from '@lifetracker/shared';
+import { activeTimer, sceneOrbState, useNow, buildBriefing } from '@lifetracker/shared';
+import { usePhoneBrain } from '../phoneBrain';
 import { useStore } from '../config';
 import Orb from './Orb';
 
-const TAB_VIEW = { now: 'tasks', summary: 'reports', alerts: 'alerts' };
+const TAB_VIEW = { assistant: 'assistant', now: 'tasks', summary: 'reports', alerts: 'alerts' };
 
 function hexToTriplet(hex) {
   const n = parseInt(hex.slice(1), 16);
@@ -15,8 +16,12 @@ export default function Scene({ tab }) {
   const now = useNow(1000);
   const tasks = useStore((s) => s.tasks);
   const today = useStore((s) => s.today);
+  const settings = useStore((s) => s.settings);
+  const mode = usePhoneBrain((s) => s.mode);
   const info = activeTimer(tasks, today, now);
-  const state = { ...sceneOrbState(TAB_VIEW[tab] || 'tasks', info), offset: [0, 0.5] };
+  const status = tab === 'assistant' ? buildBriefing({ tasks, today, settings, now }).status : null;
+  const orbMode = mode === 'waiting' ? 'thinking' : mode;
+  const state = { ...sceneOrbState(TAB_VIEW[tab] || 'tasks', info, { status, mode: orbMode }), offset: [0, 0.5] };
 
   const [burst, setBurst] = useState(0);
   const lastDone = useRef(null);

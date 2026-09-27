@@ -1,4 +1,4 @@
-import { CheckCircle2, AlarmClock, Hourglass, PartyPopper, ClipboardList, Sparkles, EyeOff, Coffee, Gauge, Moon } from 'lucide-react';
+import { CheckCircle2, AlarmClock, Hourglass, PartyPopper, ClipboardList, Sparkles, EyeOff, Coffee, Gauge, Moon, BellRing } from 'lucide-react';
 
 export const KIND_STYLE = {
   completed: { icon: CheckCircle2, cls: 'border border-emerald-300/30 text-emerald-300' },
@@ -12,4 +12,5 @@ export const KIND_STYLE = {
   checkin: { icon: Coffee, cls: 'border border-sky-300/30 text-sky-300' },
   pace: { icon: Gauge, cls: 'border border-amber-300/30 text-amber-300' },
   report: { icon: Moon, cls: 'border border-violet-300/30 text-violet-300' },
+  reminder: { icon: BellRing, cls: 'border border-cyan-300/30 text-cyan-300' },
 };
